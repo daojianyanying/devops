@@ -1,0 +1,47 @@
+pipeline{
+	#agent的节点设置
+	agent any
+	agent none //设置为none时，就必须在每一个stage中指定运行的标签(这里可能会有代码不同步的问题，具体的应用场景还得看)
+	agent{
+		label "maven"
+	}
+	agent{
+		node{
+			label "maven"
+			customWorkspace "/data/jenkins/workspace/maven/"
+		}
+	}
+	
+	#env流水线运行时的环境变量设置,分为流水线级别和stage级别
+	environment{
+		version=5.2.0
+		buildType=maven
+		jdk_version=1.8
+	}
+	
+	#options运行时选项
+	options{
+		#设置保存的记录数
+		buildDiscarder(logRotator(numToKeepStr: '1'))
+		#在检出代码时，创建目录，将代码放入文件夹中
+		checkoutToSubdirectory('foo')
+		#禁止并行构建
+		disableConcurrentBuilds()
+		#跳过代码检出
+		skipDefaultCheckout()
+		#设定流水线的超时时间(可用于阶段级别)
+		timeout(time: 1,unit: "HOURS")
+		#设定流水线的重试次数(可用于阶段级别)
+		retry(3)
+		#设置日志时间输出(可用于阶段级别)
+		timestamps()
+	}
+	
+	#参数化构建
+	parameters{
+		string(name: 'buildType', defaultValue: 'maven', description: '构建方式')
+	}
+	
+	#触发器
+	
+}
