@@ -23,18 +23,25 @@ pipeline{
 	options{
 		#设置保存的记录数
 		buildDiscarder(logRotator(numToKeepStr: '1'))
+		
 		#在检出代码时，创建目录，将代码放入文件夹中
 		checkoutToSubdirectory('foo')
+		
 		#禁止并行构建
 		disableConcurrentBuilds()
+		
 		#跳过代码检出
 		skipDefaultCheckout()
+		
 		#设定流水线的超时时间(可用于阶段级别)
 		timeout(time: 1,unit: "HOURS")
+		
 		#设定流水线的重试次数(可用于阶段级别)
 		retry(3)
+		
 		#设置日志时间输出(可用于阶段级别)
 		timestamps()
+		
 	}
 	
 	#参数化构建
@@ -42,6 +49,15 @@ pipeline{
 		string(name: 'buildType', defaultValue: 'maven', description: '构建方式')
 	}
 	
-	#触发器
 	
+	#触发器
+	triggers{
+		cron('H */7 * * 1-5')
+	}
+	
+	#when 阶段运行控制，放在stage中
+		根据环境变量判断
+		根据表达式判断
+		根据条件判断
+	when
 }
