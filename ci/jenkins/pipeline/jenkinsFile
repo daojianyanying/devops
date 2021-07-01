@@ -1,0 +1,70 @@
+@Library("devops@master") _
+try{
+    println("${gitlab_json}")
+    def gitlablib = new common.peopele.devops.gitlab()
+    def gitlabWebHookData = gitlablib.getJsonData("${gitlab_json}")
+    env.buildRepository = gitlabWebHookData["project"]["web_url"]
+    env.buildBranch = gitlabWebHookData["object_attributes"]["target_branch"]
+    print("构建方式为:MR")
+    env.buildType="MR"
+}catch(Exception e){
+    print("构建方式为:手动执行")
+    env.buildType="manual"
+}
+
+pipeline{
+	agent{label "maven"}
+
+	environment{
+        buildTool="maven"
+    }
+
+    stages{
+        stage("build"){
+            stages{
+                stage("print param"){
+                    steps{
+                        print("$buildRepository")
+                        print("$buildType")
+                        print("$buildBranch")
+                    }
+
+                }
+                stage('checkcode') {
+                    steps{
+                        checkout(
+                        [$class: 'GitSCM', branches: [[name: "${buildBranch}"]], 
+                        extensions: [], 
+                        userRemoteConfigs: [[credentialsId: 'docker_gitlab', 
+                        url: "${buildRepository}"]]])
+                    }
+                } 
+
+                stage("compile"){
+                    steps{
+                        print("执行编译")
+                    }
+                    
+                }
+
+                stage("sonarcheck"){
+                    steps{
+                        print("执行检查")
+                    }
+                    
+                }
+            }
+        }
+
+    }
+
+	post {
+		failure {
+			updateGitlabCommitStatus name: 'build', state: 'failed'
+		  }
+		  success {
+			updateGitlabCommitStatus name: 'build', state: 'success'
+		  }
+    }
+	
+}

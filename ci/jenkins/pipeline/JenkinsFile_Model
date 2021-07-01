@@ -60,4 +60,50 @@ pipeline{
 		根据表达式判断
 		根据条件判断
 	when
+	
+	#任务
+	#1. 一个stage下面只能有1个steps、stages或者parallel
+	#2. 只有stage可以设置名字
+	#任务嵌套
+
+	stages{
+        stage("build"){
+            stages{
+                stage("print param"){
+                    steps{}
+                }
+                stage('checkcode') {
+                    steps{
+                    }
+                } 
+                stage("compile"){
+                    steps{
+                    }
+                    
+                }
+                stage("sonarcheck"){
+                    steps{
+                    }  
+                }
+            }
+        }
+	}
+
+	#任务并行
+	stages{
+        stage("并行父任务"){
+			parallel{
+				stage("并行任务1"){
+					steps{}
+				}
+				stage("并行任务2"){
+					steps{}
+				}
+				stage("并行任务3"){
+					steps{}
+				}
+			}
+        }
+	}
+
 }
