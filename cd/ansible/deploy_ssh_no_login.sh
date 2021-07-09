@@ -21,7 +21,7 @@ fi
 
 #先判断rsa文件是否存在，退出执行，不存在则生成ssh的公钥和私钥
 if [[ -f "/root/.ssh/id_rsa" || -f  "/root/.ssh/id_rsa.pub" ]];then
-	echo "the ssh secret file has exist"
+	echo "the ssh rsa secret file has exist"
 	exit -1
 fi
 
@@ -29,3 +29,4 @@ fi
 ssh-keygen -f /root/.ssh/id_rsa -P ''
 
 #将公钥推送到需要的机器上
+
