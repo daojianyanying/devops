@@ -11,6 +11,7 @@ set -x
 
 passwordTextPath=$1
 passwordDefault="Liu3574153123"
+remoteip="192.168.36.150"
 
 #安装需要使用的命令
 yum -y install sshpass openssh-server openssh-clients
@@ -29,4 +30,4 @@ fi
 ssh-keygen -f /root/.ssh/id_rsa -P ''
 
 #将公钥推送到需要的机器上
-
+sshpass -p ${passwordDefault} ssh-copy-id  -i ~/.ssh/id_rsa.pub ${root}@${remoteip}
