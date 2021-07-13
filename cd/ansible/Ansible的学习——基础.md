@@ -21,7 +21,7 @@
 
 
 
-一、 Ansible的安装以及可能遇到的问题
+### 一、 Ansible的安装以及可能遇到的问题
 
 1.1 yum方式安装
 
@@ -77,7 +77,7 @@ ansible 2.9.21
 
 
 
-二、 Ansible的目录和配置文件
+### 二、 Ansible的目录和配置文件
 
 2.1 配置文件
 
@@ -127,7 +127,7 @@ ansible 2.9.21
 
 
 
-三、 ansible命令的使用·
+### 三、 ansible命令的使用·
 
 **ansible  <host-pattern>  [-m  module_name]  [-a args]**
 
@@ -142,3 +142,129 @@ ansible 2.9.21
 - -b                           #代替旧版的sudo   切换sudo
 -  --become-user=USERNAME   #指定sudo的runas用户，默认为root
 - -K                           #提示sudo时的指令
+
+
+
+### 四、yml语法规则
+
+### 五、 playbooks的使用
+
+##### 5.1  核心元素
+
+- Hosts：针对哪些主机
+
+- Tasks：任务集
+
+- Variables：内置变量或自定义变量在playbooks中调用
+
+- Template：模板 可以替换模板文件中的变量并实现一些简单逻辑文件
+
+- Handler和notify结合使用：由特定条件触发的操作，满足条件方才执行，否则不执行
+
+- tags：标签 执行某条任务的执行，用于选择执行playbooks中的部分代码
+
+  
+
+###### 5.1.1 Hosts
+
+用于指定用执行任务的主机
+
+```shell
+www.devops.com #
+www.devops.com:www.ci.com:www.cd.com #
+192.168.36.150 #
+192.168.36.* #
+devops:test #或者
+devops:&ci #交集
+devops:!ci #在devops组，但是不在ci组的
+```
+
+###### 5.1.2  remote_user组件
+
+用于Host和Task中，也可以通过指定其通过sudo的方式在远程主机上执行任务，其可用于play全局或者某任务，此外，甚至可以在sudo时使用sudo_user指定sudo时切换的用户。
+
+```yaml
+- hosts: devops
+    remote_user: root
+  tasks: 
+    - name: test connection
+      ping: 
+      remote_user: magedu
+      sudo: yes
+      sudo_user: wang
+```
+
+###### 5.1.3 task列表和action组件
+
+play的主体时task list
+
+
+
+**task的俩种格式：**
+
+- action: model arguments
+- module: arguments (建议使用)
+
+```yaml
+---
+- hosts: devops
+  remote_user: root
+  task: 
+    - name: install httpd
+      yum: name=httpd
+    - name: start httpd
+      service: name=http state=started enabled=yes
+```
+
+###### 5.1.4 其他组件
+
+某任务的状态在运行后为changed时，可以通过“notify”通知给相应的handlers任务。
+
+任务可以用过打tags标签，可以在ansible-playbook命令上使用-t调用
+
+
+
+###### 5.1.5 ShellScript VS playbooks
+
+```shell
+#/bin/bash
+#shell实现方式
+#安装Apache HTTP
+yum install -y --quiet httpd
+#复制配置文件
+cp /tmp/httpd.conf /etc/httpd/conf/httpd.conf
+cp /tmp/vhosts.conf /etc/httpd/conf.d/
+#启动Apache,并且设置为开机启动
+systemctl enable --now httpd
+```
+
+```yaml
+#playbooks实现
+---
+  - hosts: devops
+    remote_user: root
+    tasks: 
+      - name: "a安装Apache HTTP"
+        yum: name=httpd
+      - name: "复制配置文件"
+        copy: src=/tmp/httpd.conf dest=/etc/httpd/conf/httpd.conf
+      - name: "复制配置文件"
+        copy: src=/tmp/vhosts.conf dest=/etc/httpd/conf.d/
+      - name: "设置为开机启动"
+        service: name=httpd state=started enabled=yes
+    
+```
+
+
+
+##### 5.2 playbooks命令
+
+**格式：** **ansible-playbook  filename.yaml  ...  options**
+
+- -C:——只检测可能发生的改变，但是不执行
+- --list-host:——列出运行任务的主机
+- --list-tags:——列出tag
+- --list-tasks:——列出tasks
+- --limit 主机列表:——只针对主机列表中的主机执行
+- -v   -vv   -vvv: 显示过程
+
