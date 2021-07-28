@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <!-- 本地仓库配置-->
+  <localRepository>C:\Users\liu35\.m2\repository</localRepository>
+  
+  <!--指令模式 -->
+  <interactiveMode>true</interactiveMode>
+  
+  <!-- 离线模式，确定maven在执行构建时是否应尝试连接到网络，这会对构件的下载、部署和其他操作产生影响，默认关闭 -->
+  <offline>false</offline>
+  
+  <!--Maven配置代理服务器 -->
+  <proxies>
+    <proxy>
+      <id>proxy-server-1</id>
+      <active>true</active>
+      <protocol>http</protocol>
+      <username>proxyuser</username>
+      <password>proxypass</password>
+      <host>proxy.host.net</host>
+      <port>80</port>
+      <nonProxyHosts>local.net|some.host.com</nonProxyHosts>
+    </proxy>
+  </proxies>
+  
+  <pluginGroups>
+  </pluginGroups>
+
+  <!--配置我们每个私服对应的账号密码或者私钥指纹,我们可以根据不同的私服server（根据id区分）来配置每个私服的账号和密码。
+	这个id是在项目的pom.xml中distributionManagement里面配置的私服的id是一致的
+	<distributionManagement>
+		<repository>
+			<id>nexus-release</id>
+			<name>RELEASES</name>
+			<url>http://172.10.0.100:8081/repository/cat-releases/</url>
+		</repository>
+
+		<snapshotRepository>
+			<id>nexus-snapshot</id>
+			<name>SNAPSHOT</name>
+			<url>http://172.10.0.100:8081/repository/cat-snapshot/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	
+	-->
+  <servers>
+	<server> 
+       <id>nexus-release</id> <!--这个ID要与下面的repository中的ID一致-->
+       <username>admin</username> <!--nexus中配置的用户名密码-->
+       <password>Liu3574153123</password> 
+    </server>
+	
+	<server> 
+       <id>nexus-snapshot</id> <!--这个ID要与下面的repository中的ID一致-->
+       <username>admin</username> <!--nexus中配置的用户名密码-->
+       <password>Liu3574153123</password> 
+    </server>
+  </servers>
+  
+  <!--镜像是指目标仓库的镜像、备用库、copy。配置了镜像之后，Maven会从“备用仓库”里面获取依赖，而不是目标仓库
+	id是这个镜像的ID，全局唯一不能重复。
+	name是这个镜像的名称。
+	url是镜像地址，指定了从哪个地址中获取依赖。
+	mirroOf是指这个镜像对哪个库生效。	
+  -->
+  <mirrors>
+	 <mirror>
+       <id>nexus-public</id>
+       <mirrorOf>central</mirrorOf>
+       <name>central repository</name>
+       <url>http://localhost:8081/repository/maven-public/</url>
+	 </mirror>
+	 
+	 <!--
+    <mirror>
+      <id>ali-maven</id>
+      <mirrorOf>central</mirrorOf>
+      <name>aliyun maven</name>
+      <url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
+	</mirror>
+	-->
+  </mirrors>
+  
+  <!--
+	profile中文是总则，profile可以让我们定义一系列的配置信息，包含在profiles配置列表标签对中，
+	每个profile配置都可以通过activeProfile或命令行或者activeByDefault来激活，达到在不同的环
+	境下自由切换配置的目的，激活的会在下面说明，先看看profile的配置。profile可以在
+	settings.xml中配置，也可以在pom.xml文件中配置。
+	注意：profile一定要给定一个全局唯一的ID，不能冲突
+  -->
+  <profiles>
+	<profile> 
+        <id>nexus</id> 
+        <repositories> 
+            <repository> 
+                <id>nexus-release</id> <!--正式仓库id-->
+                <!--name随便-->
+                <name>Nexus Release Repository</name> 
+                <!--地址是nexus中repository（Releases）中对应的地址-->
+                <url>http://localhost:8081/repository/release/</url>
+                <releases>
+                    <enabled>true</enabled>
+                </releases> 
+                <snapshots>
+                    <enabled>false</enabled>
+                </snapshots> 
+            </repository>
+            <repository>
+                <id>nexus-snapshot</id> <!--正式仓库id-->
+				<!--name随便-->
+				<name>Nexus Snapshot Repository</name> 
+				<!--地址是nexus中repository（snapshot）中对应的地址-->
+                <url>http://localhost:8081/repository/snapshot/</url>
+                <releases><enabled>false</enabled></releases>
+                <snapshots><enabled>true</enabled></snapshots>
+            </repository>
+
+        </repositories> 
+        <pluginRepositories> <!--插件仓库地址，各节点的含义和上面是一样的-->
+            <pluginRepository> 
+                <id>nexus-rs</id> 
+                <name>Nexus Release Snapshot Repository</name> 
+                <url>http://localhost:8081/repository/3Party/</url>
+                <releases>
+                    <enabled>true</enabled>
+                </releases> 
+                <snapshots>
+                    <enabled>false</enabled>
+                </snapshots>
+            </pluginRepository> 
+        </pluginRepositories> 
+    </profile>
+  </profiles>
+  <activeProfiles>
+     <activeProfile>nexus</activeProfile> <!--profile下的id-->
+  </activeProfiles>
+
+</settings>
