@@ -145,7 +145,67 @@ ansible 2.9.21
 
 
 
-### 四、yml语法规则
+### 四、yml语法规则——模块
+
+##### 4.1  user模块
+
+- name: 必选参数，指定要操作的用户名
+
+- group: 用于指定用户的所属组
+
+- groups: 指定用户所在的附加组
+
+- append: 是否覆盖原先的附加组，和groups一起使用
+
+- shell: 指定用户的默认shell
+
+- uid: 指定用户的id号
+
+- expires : 设置用户的过期时间，相当于/etc/shadow文件的第8列
+
+  ```shell
+  [root@k8s-master playbook]# date -d 2021-12-31 +%s
+  1640880000
+  expire=1640880000
+  ```
+
+- state: present表示用户存在， absent表示删除用户
+
+- home: 
+
+- create_home: yes或者no 当创建用户，目录不存在时，为用户创建home目录
+
+- home: 指定用户的home目录
+
+- password： 设定用户的密码
+
+- system: 是否设置为系统账户
+
+
+
+##### 4.2 group模块
+
+- name: 指定要操作的用户组
+- state: 默认为present,为absent表示删除所数组
+- gid: 指定组的gid
+- system: 是否设置为系统账户
+
+
+
+##### 4.3 service模块
+
+- name: 指定操作服务的名字
+- state=started|stopped|restarted|reloaded：指定服务的状态
+- enabled=yes|no：指定服务是否为开机启动项
+
+
+
+##### 4.4 shell模块
+
+- chdir： 指定一个命令操作目录
+- creates: 使用参数指定一个目录，文件存在就不会执行命令
+- removes: 指定一个文件，不存在时就不会执行该命令
+- 
 
 ### 五、 playbooks的使用
 
@@ -267,4 +327,6 @@ systemctl enable --now httpd
 - --list-tasks:——列出tasks
 - --limit 主机列表:——只针对主机列表中的主机执行
 - -v   -vv   -vvv: 显示过程
+
+
 
