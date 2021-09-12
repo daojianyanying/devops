@@ -1,0 +1,55 @@
+涉及工具:VisualSVN Server
+	git (实验版本：git version 2.28.0.windows.1)
+	TortoiseGit
+	TortoiseSVN
+	gitlab(实验版本:gitlab-ce:13.11.3-ce.0)
+	SVNServer(实验版本:VisualSVN-Server-4.3.4-x64)
+
+基本流程：
+	一、在SVN的服务器上造仓库、用户、提交记录
+		若是迁移，
+	二、在gitlab上创建代码仓库和用户，用户要和SVN的用户一一对应
+	
+	三、开始迁移svn的代码库到gitlab上
+	参考网址:https://git-scm.com/book/zh/v2/Git-%E4%B8%8E%E5%85%B6%E4%BB%96%E7%B3%BB%E7%BB%9F-%E8%BF%81%E7%A7%BB%E5%88%B0-Git
+	
+	3.1、 创建svn和git的用户对照表(这里有坑)-users.txt
+	坑1:对照表中一定要有VisualSVN Server的对照表，本人时用它关联了gitlab的管理员
+	坑2：每个svn关联的gitlab的用户必须加上<邮箱地址>，否者会报用户找不到用户的错误导致迁移失败
+	坑3：也可以用网页提供的命令
+		svn log --xml --quiet | grep author | sort -u | perl -pe 's/.*>(.*?)<.*/$1 = /'
+		awk如何实现？？？
+		
+		VisualSVN Server = jenkins-test <admin@yourdomain.com>
+		dev1 = dev1 <dev1@123.com>
+		dev2 = dev2	<dev2@123.com>
+		dev3 = dev3 <dev3@123.com>
+		dev4 = dev4 <dev3@123.com>
+		dev5 = dev5 <dev3@123.com>
+		dev6 = dev6 <dev3@123.com>
+		dev7 = dev7 <dev3@123.com>
+		dev8 = dev8 <dev3@123.com>
+		dev9 = dev9 <dev3@123.com>
+		root = Administrator <aaa@123.com>
+	
+	3.2、使用git自带的git svn工具下载svn代码
+		git svn clone -r5:HEAD <svn_address>  --authors-file=users.txt --no-metadata --prefix ""  -s  svntest
+		git svn clone http://lx:8388/svn/SVNTest/  --authors-file=user.txt --no-metadata --prefix ""  -s  svntest
+		命令解析：
+			<svn_address>: svn的地址
+			–no-metadata: 防止git拉取无用的SVN附加信息
+			--authors-file: 用户对照表
+			--prefix: 
+			-s : 生成的仓库目录
+			-r(深度):HEAD
+	3.3、清理分支、tag、
+		for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t; done
+		for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b; done
+		for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p; done
+		git branch -d trunk
+		git remote add origin git@my-git-server:myrepository.git
+		git pull origin master --allow-unrelated-histories
+		git push origin --all
+		git push origin --tags
+	git branch -D -r 分支名
+	
