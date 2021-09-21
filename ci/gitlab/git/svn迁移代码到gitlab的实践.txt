@@ -51,5 +51,5 @@
 		git pull origin master --allow-unrelated-histories
 		git push origin --all
 		git push origin --tags
-	git branch -D -r 分支名
+	git branch -D -r 分支名  删除远程分支
 	
