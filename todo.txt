@@ -1,0 +1,3 @@
+git daemon
+OpenGrok
+redmine和禅道
