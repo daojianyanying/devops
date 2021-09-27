@@ -53,3 +53,11 @@ gitlab_rails['gitlab_shell_ssh_port'] = 2222
 ```
 
 这里的字符串一定要用双引号，其次这里的时区请用Asia/Shanghai,因为ubantu不支持Asia/Beijing，会导致gitlab启动报错
+
+邮箱验证：
+
+```shell
+ gitlab-rails console
+ Notify.test_email('目标邮箱', '邮箱标题', '邮件内容').deliver_now
+```
+
