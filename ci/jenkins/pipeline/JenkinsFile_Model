@@ -19,6 +19,13 @@ pipeline{
 		jdk_version=1.8
 	}
 	
+	#tools的配置
+	需要在jenkins配置maven、jdk环境，名称为maven-3.5.3、jdk为Oracle_jdk8
+	tools {
+        maven 'maven'
+        jdk   'Oracle_jdk8'
+    }
+	
 	#options运行时选项
 	options{
 		#设置保存的记录数
@@ -55,7 +62,7 @@ pipeline{
 		cron('H */7 * * 1-5')
 	}
 	
-	#when 阶段运行控制，放在stage中
+	#when 阶段运行控制，放在stage中,steps之前
 		根据环境变量判断
 		根据表达式判断
 		根据条件判断
@@ -70,6 +77,12 @@ pipeline{
         stage("build"){
             stages{
                 stage("print param"){
+					 when {
+						//when进行判断，若变量ACTION的值是Deploy_to_development_environment，则执行这个步骤。
+						//Deploy_to_development_environment是参数化构建里面配置好的。
+						 equals expected: 'Deploy_to_development_environment', 
+						 actual: ACTION
+					}
                     steps{}
                 }
                 stage('checkcode') {
@@ -104,6 +117,25 @@ pipeline{
 				}
 			}
         }
+		stage("串行任务"){
+			steps{
+			}
+		}
 	}
-
+	
+	post{
+		failure {
+            //当此Pipeline失败时打印消息
+            echo 'failure'
+        }
+		changed {
+		   echo 'pipeline post changed'
+		}
+		always {
+		   echo 'pipeline post always'
+		}
+		success {
+		   echo 'pipeline post success'
+		}
+	}
 }
