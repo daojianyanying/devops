@@ -32,13 +32,21 @@ def check(strict):
     log_list = os.popen('git log ' + COMMIT_FORMER + '..' + COMMIT_CURRENT + ' --pretty=format:%s').readlines()
     if strict:
         for log in log_list:
-            if re.match(r'正则匹配内容', log, re.I) is None:
+            if re.match(r'^Merge\sBranch.*', log, re.I):
+                pass
+            elif: re.match(r'^Revert.*', log, re.I):
+                pass
+            elif re.match(r'正则匹配内容', log, re.I) is None:
                 print('Message check failed:' + log)
                 print_message_example
                 exit(1)
         print('Message check success')
     else:
-        if re.match(r'正则匹配内容', log_list[0], re.I) is None:
+        if re.match(r'^Merge\sBranch.*', log_list[0], re.I):
+            pass
+        elif re.match(r'^Revert.*', log_list[0], re.I):
+            pass
+        elif re.match(r'正则匹配内容', log_list[0], re.I) is None:
             print('Message check failed:' + log_list[0])
             print_message_example
             exit(1)

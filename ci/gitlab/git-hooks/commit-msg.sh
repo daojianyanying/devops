@@ -42,6 +42,16 @@ function commit_message_check(){
         echo_message_example
         exit 1
     fi
+	echo "Commit Message check success"
 }
 
-commit_message_check
+function main(){
+	if echo $FIRST_LINE | grep -qiE "^Merge\sBranch";then
+		exit 0
+	elif echo $FIRST_LINE | grep -qiE "^Revert";then
+		exit 0
+	else
+		commit_message_check
+}
+
+main
