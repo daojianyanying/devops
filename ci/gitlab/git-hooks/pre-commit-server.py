@@ -36,7 +36,7 @@ def check(strict):
                 pass
             elif: re.match(r'^Revert.*', log, re.I):
                 pass
-            elif re.match(r'正则匹配内容', log, re.I) is None:
+            elif not log.startswith('Merge branch') and re.match(r'正则匹配内容', log, re.I) is None:
                 print('Message check failed:' + log)
                 print_message_example
                 exit(1)
@@ -46,7 +46,7 @@ def check(strict):
             pass
         elif re.match(r'^Revert.*', log_list[0], re.I):
             pass
-        elif re.match(r'正则匹配内容', log_list[0], re.I) is None:
+        elif not log_list[0].startswith('Merge branch') and re.match(r'正则匹配内容', log_list[0], re.I) is None:
             print('Message check failed:' + log_list[0])
             print_message_example
             exit(1)
@@ -54,7 +54,7 @@ def check(strict):
             print('Message check success')
 
 if __name__ == '__main__':
-    if COMMIT_FORMER == '0000000000000000000000000000000000000000':
+    if COMMIT_FORMER == '0000000000000000000000000000000000000000' and COMMIT_CURRENT == '0000000000000000000000000000000000000000':
         pass
     else:
         check(False)
