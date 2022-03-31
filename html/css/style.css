@@ -1,0 +1,42 @@
+body{
+    font-size: 16px;
+}
+a{
+    text-decoration: none;
+}
+#header{
+    width: 100%;
+    height: 40px;
+}
+.header{
+    width: 1200px;
+    height: 40px;
+    border: 1px;
+}
+.header-left{
+    width: 400px;
+    height: 40px;
+    float: left;
+}
+.header-right{
+    width: 400px;
+    height: 40px;
+    background-color: blue;
+    float:right;
+}
+/* 设置内容样式 */
+.header-left>div{
+    float: left;
+    line-height: 40px;
+    color: #8492A6;
+}
+.header-left>div>span{
+    font-weight: bold;
+}
+.header-left>div:nth-child(2)>a, .header-left>div:nth-child(2)>a>img,.header-left>div:nth-child(2)>a>i{
+    float: left;
+}
+.header-left>div:nth-child(2)>a>img{
+    width: 17px;
+    line-height: 40px;
+}
