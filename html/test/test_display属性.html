@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>display属性</title>
+    <style>
+        div,span{
+            width: 200px;
+            height: 200px;
+        }
+        div{
+            background: red;
+            /* 设置为行内元素 */
+            /* display: inline; */
+            /* 设置元素为行内块元素，具有宽高属性，并且独占一行 */
+            /* display: inline-block; */
+            /* display: table-cell; */
+            /* 隐藏元素隐藏位置和内容*/
+            /* display: none; */
+            /* 隐藏元素,占据原有有位置 */
+            /* 
+                opacity: 0;
+                visibility:设置元素是否显示
+                    visible：显示
+                    hidden: 隐藏
+                    注意：visibility和display的区别：visiblity的隐藏方式时仅仅隐藏内容的显示，其占用的空间依旧占用，
+                    而display：none的隐藏方式是隐藏该元素的内容和位置
+            */
+            /* visibility: hidden; */
+            
+        }
+        span{
+            background: fuchsia;
+            /* 设置为块状元素 */
+            /* display: block; */
+        }
+    </style>
+</head>
+<body>
+    <!-- div块元素,具有高宽属性,并且独占一行 -->
+    <div id="one">这是块状元素</div>
+    <!-- <div id="one">这是块状元素</div>
+    <div id="one">这是块状元素</div>
+    <div id="one">这是块状元素</div>
+    <div id="one">这是块状元素</div>
+    <div id="one">这是块状元素</div>
+    <div id="one">这是块状元素</div> -->
+
+
+    <!-- 行内元素,没有高宽属性,不会独占一行 -->
+    <span id="two">这是行内元素</span>
+</body>
+</html>

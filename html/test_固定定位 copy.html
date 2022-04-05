@@ -2,31 +2,67 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>z-index</title>
+    <title>盒子模型</title>
     <style>
-        #one{
-            width: 200px;
-            height: 200px;
-            background: red;
-            position: absolute;
-            top:100px;
-            left:100px;
-            z-index: 4;
+        #box{
+            width: 700px;
+            height: 700px;
+            background: pink;
         }
-        #two{
+        #top{
+            width: 600px;
+            height: 200px;
+            background: yellow;
+            float: left;
+        }
+        #left{
             width: 200px;
             height: 200px;
             background: green;
-            position: absolute;
-            top:150px;
-            left:150px;
-            z-index: 2;
+            float: left;
         }
+        #self{
+            width: 200px;
+            height: 200px;
+            background: white;
+            float: left;
+            /* margin 
+                上 右 下 左
+                1.设置块状元素居中 margin: 10px auto;
+                2.外间距合并,margin外间距以大的为标准
+                3.块级元素的相邻外边距会合并
+                4.行内元素实际上占上下外边距，左右边距也不合并
+                5.浮动元素的外边距不会合并
+                6.允许指定负值的外边距值
+            */
+            margin: 10px;
+        }
+        #right{
+            width: 200px;
+            height: 200px;
+            background: red;
+            float: left;
+        }
+        #bottom{
+            width: 600px;
+            height: 200px;
+            background: blue;
+            float: left;
+        }
+
     </style>
 </head>
 <body>
-    <!-- z-index属性只支持定位元素 -->
-    <div id="one"></div>
-    <div id="two"></div>
+    <div id="box">
+        <div id="top">顶部元素</div>
+        <div id="left">左侧元素</div>
+        <div id="self">当前元素</div>
+        <div id="right">右侧元素</div>
+        <div id="bottom">底部元素</div>
+    </div>
+
+    <div>
+
+    </div>
 </body>
 </html>

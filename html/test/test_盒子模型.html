@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>盒子模型</title>
+    <style>
+        #box{
+            width: 800px;
+            height: 800px;
+            background: pink;
+        }
+
+        #box>div>:nth-child(1){
+            width: 600px;
+            height: 200px;
+            background: black;
+            float: left;
+        }
+        #box>div>:nth-child(2){
+            width: 200px;
+            height: 200px;
+            background: aqua;
+            float: left;
+        }
+        #box>div>:nth-child(3){
+            width: 200px;
+            height: 200px;
+            background: white;
+            float: left;
+        }
+        #box>div>:nth-child(4){
+            width: 200px;
+            height: 200px;
+            background: aqua;
+            float: left;
+        }
+        #box>div>:nth-child(5){
+            width: 600px;
+            height: 200px;
+            background: aqua;
+            float: left;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="box">
+        <div>顶部元素</div>
+        <div>左侧元素</div>
+        <div id="self">当前元素</div>
+        <div>右侧元素</div>
+        <div>底部元素</div>
+    </div>
+</body>
+</html>

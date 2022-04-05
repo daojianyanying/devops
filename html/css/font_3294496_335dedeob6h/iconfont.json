@@ -1,0 +1,79 @@
+{
+  "id": "3294496",
+  "name": "report",
+  "font_family": "iconfont",
+  "css_prefix_text": "report-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "6539844",
+      "name": "查看详情",
+      "font_class": "chakanxiangqing",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "11752152",
+      "name": "对号备份",
+      "font_class": "duihaobeifen",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "15799214",
+      "name": "错误",
+      "font_class": "cuowu1",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "18267931",
+      "name": "链接",
+      "font_class": "lianjie",
+      "unicode": "e992",
+      "unicode_decimal": 59794
+    },
+    {
+      "icon_id": "1346705",
+      "name": "链接",
+      "font_class": "icon-test",
+      "unicode": "e66d",
+      "unicode_decimal": 58989
+    },
+    {
+      "icon_id": "1677616",
+      "name": "详情",
+      "font_class": "xiangqing",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "23846303",
+      "name": "more",
+      "font_class": "more",
+      "unicode": "e665",
+      "unicode_decimal": 58981
+    },
+    {
+      "icon_id": "1237129",
+      "name": "检查",
+      "font_class": "checked",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "9826657",
+      "name": "错误",
+      "font_class": "cuowu",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "26489590",
+      "name": "警告，提醒，错误",
+      "font_class": "a-jinggaotixingcuowu",
+      "unicode": "e6e1",
+      "unicode_decimal": 59105
+    }
+  ]
+}
