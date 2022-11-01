@@ -12,19 +12,19 @@
 
 - 选择语言
 
-![](./image/ubuntu_install_1.png)
+![](image/ubuntu_install_1.png)
 
 
 
 - 选择是否在安装时更新，选择的话，将会下载最新的ubuntu的版本进行安装，这里不用更新
 
-![](./image/ubuntu_install_2.png)
+![](image/ubuntu_install_2.png)
 
 
 
 - 键盘语言设置
 
-![](./image/ubuntu_install_3.png)
+![](image/ubuntu_install_3.png)
 
 
 
@@ -50,67 +50,67 @@
 
   
 
-![](./image/ubuntu_install_4.png)
+![](image/ubuntu_install_4.png)
 
-![](./image/ubuntu_install_5.png)
+![](image/ubuntu_install_5.png)
 
-![](./image/ubuntu_install_6.png)
+![](image/ubuntu_install_6.png)
 
-![](./image/ubuntu_install_7.png)
+![](image/ubuntu_install_7.png)
 
 
 
 - 代理地址
 
-![](./image/ubuntu_install_8.png)
+![](image/ubuntu_install_8.png)
 
 
 
 - 填写apt使用的源
 
-![](./image/ubuntu_install_9.png)
+![](image/ubuntu_install_9.png)
 
 
 
 - 分区
 
-![](./image/ubuntu_install_10.png)
+![](image/ubuntu_install_10.png)
 
-![](./image/ubuntu_install_11.png)
+![](image/ubuntu_install_11.png)
 
-![](./image/ubuntu_install_12.png)
+![](image/ubuntu_install_12.png)
 
-![](./image/ubuntu_install_13.png)
+![](image/ubuntu_install_13.png)
 
-![](./image/ubuntu_install_14.png)
+![](image/ubuntu_install_14.png)
 
-![](./image/ubuntu_install_15.png)
+![](image/ubuntu_install_15.png)
 
-![](./image/ubuntu_install_16.png)
+![](image/ubuntu_install_16.png)
 
-![](./image/ubuntu_install_17.png)
+![](image/ubuntu_install_17.png)
 
 
 
 - 计算机名、账户密码设置
 
-![](./image/ubuntu_install_18.png)
+![](image/ubuntu_install_18.png)
 
-![](./image/ubuntu_install_19.png)
+![](image/ubuntu_install_19.png)
 
 
 
 - 不启动ftp服务器
 
-![](./image/ubuntu_install_20.png)
+![](image/ubuntu_install_20.png)
 
 
 
 - 选择系统安装软件
 
-![](./image/ubuntu_install_21.png)
+![](image/ubuntu_install_21.png)
 
-![](./image/ubuntu_install_22.png)
+![](image/ubuntu_install_22.png)
 
-![](./image/ubuntu_install_23.png)
+![](image/ubuntu_install_23.png)
 
