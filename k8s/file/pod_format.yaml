@@ -1,0 +1,191 @@
+apiVersion: v1     #必选，API版本号
+kind: Pod       　 #必选，资源类型，例如 Pod
+metadata:       　 #必选，元数据
+  # name在namespace内必须唯一
+  name: nginx     #必选，Pod名称，名称需要符合RFC1035规则
+  namespace: default  #Pod所属的命名空间,默认为"default"，可以使用-n指定namespace
+  labels:       　　  #自定义标签列表，label是key和vaue组成的map，用来标识和分类物体。主要是controller和service通过label selector来管理和使用pod
+    name1: string1
+    name2：string2
+  annotation: #可选,注释列表可以写多个
+    app: nginx    
+spec:  #必选，Pod中容器的详细定义  # pod的期望行为的具体描述
+  # 初始化容器，在容器启动之前执行的一些初始化操作
+  initContainers: 
+  - command:
+    - sh
+    - -c
+    - echo "I am InitContainer for init some configuration"
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    name: init-container
+  # 主容器定义
+  # 若是初始化容器，则是initcontainers
+  # 注意，containers是数组，表示可以有多个容器，
+  # 参考yaml的语法规则，每一条横线都代表是一个完整的元素
+  containers:  #必选，Pod中容器列表
+  - name: nginx   #必选，容器名称
+    image: nginx:1.15.2  #必选，容器所使用的镜像名称
+    imagePullPolicy: [ Always|Never|IfNotPresent ]  #拉取镜像的策略 
+    #总结为一句话：在容器提供的应用程序环境中注入环境变量env，然后切换到工作目录workingDir中执行命令cammand，命令参数为args
+    #容器的启动命令列表。
+    # 若指定此cammand，则镜像Dockfile中的启动命令cammand会被覆盖，以此命令来启动容器程序；
+    # 若不指定cammand，则会使用Dockfile中的启动命令cammand启动镜像程序
+    command: [string]   #可选  
+    # command: # 可选，容器启动执行的命令 ENTRYPOINT, arg --> cmd
+    # - nginx 
+    # - -g
+    # - "daemon off;"    
+    args: [string]      #容器的启动命令参数列表
+    workingDir: /usr/share/nginx/html  #容器的工作目录，也就是将位置切换到此工作目录中，然后执行cammand
+
+    # 容器运行时的环境变量信息
+    # name为环境变量名称，value为环境变量的值
+    # 这是一个数组，每个数组元素表示一个环境变量，可以有多个环境变量。
+    env:   #容器运行前需设置的环境变量列表
+    - name: string  #环境变量名称
+      value: string #环境变量的值   
+    # - name: TZ      # 变量名
+    #   value: Asia/Shanghai # 变量的值
+    # - name: LANG
+    #   value: en_US.utf8     
+
+    # 注意，这里的存储卷是数组。
+    # 可这样理解： pod定义的共享存储卷是一块硬盘，该硬盘名称为volumns中每个元素的name字段的值。
+    # 这里是将这块name的硬盘挂载在mountPath路径下，成为container的一个目录。
+    # 容器中的程序即对这个目录进行访问和操作
+    volumeMounts:       #挂载到容器内部的存储卷配置
+    - name: string      #引用pod定义的共享存储卷的名称，需用volumes[]部分定义的的卷名
+      mountPath: string #存储卷在容器内mount的绝对路径，应少于512字符
+      readOnly: boolean #是否为只读模式
+    
+    # 注意层级结构，这是此容器需要暴露的端口
+    # 此容器需要暴露的端口号为containerPort；
+    # 此containerPort映射到主机上的端口号为hostPort。
+    ports: #需要暴露的端口库号列表
+    - name: string        #端口的名称
+      containerPort: int  #容器需要监听的端口号
+      # 此hostPort与service中的nodePort上有所区别，
+      # 此hostPort是指此pod所在节点端口，只有访问pod所在主机的ip：hostport才能访问得到服务
+      # 而service中的nodePort则是指集群的port，使用集群内任意一个node的ip + nodePort就能访问到服务
+      hostPort: int       #容器所在主机需要监听的端口号，默认与ContainerPort相同。
+      protocol: string    #端口协议，支持TCP和UDP，默认TCP
+    # - name: http    # 端口名称
+    #   containerPort: 80     # 端口号
+    #   protocol: TCP # 端口协议，默认TCP       
+      
+    # container的资源限制。
+    # 这里的资源限制和资源申请是针对容器而言的
+    # 在cpu资源中，1c = 1000m
+    # 当资源超过limits中定义的资源配额时，container就会重启。
+    resources: #资源限制和请求的设置
+      # 资源上限
+      limits:  #资源限制的设置
+        cpu: string     #Cpu的限制，单位为core数，将用于docker run --cpu-shares参数
+        memory: string  #内存限制，单位可以为Mib/Gib，将用于docker run --memory参数
+      # 资源请求配置
+      requests: #资源请求的设置
+        cpu: string    #Cpu请求，容器启动的初始可用数量
+        memory: string #内存请求,容器启动的初始可用数量
+#    resources:      # 可选，资源限制和资源请求限制
+#      limits:       # 最大限制设置
+#        cpu: 1000m
+#        memory: 1024Mi
+#      requests:     # 启动所需的资源
+#        cpu: 100m
+#        memory: 512Mi
+        
+    # 生命周期钩子函数和存活性探测，都是有三种方式，exec、httpGet、tcpSocket，具体讲解可参考存活性探测中细节
+    # 详细内容后续讲解
+
+
+# 1.16后支持
+#    startupProbe: # 1.16后支持，可选，检测容器内进程是否完成启动，只检查一次，多用于启动比较慢的情况，默认inti是10s
+
+。注意三种检查方式(startupProbe、readinessProbe、livenessProbe)同时只能使用一种。
+#                  # 如果配置了startupProbe，就会禁止其他探测，知道他停止为止，成功后将不在探测
+#      httpGet:      # httpGet检测方式，生产环境建议使用httpGet实现接口级健康检查，健康检查由应用程序提供。
+#            path: /api/successStart # 检查路径
+#            port: 80
+#      
+#    readinessProbe: # 可选，健康检查。注意三种检查方式同时只能使用一种。用于判断容器内的程序是否健康
+#      httpGet:      # httpGet检测方式，生产环境建议使用httpGet实现接口级健康检查，健康检查由应用程序提供。
+#            path: / # 检查路径
+#            port: 80        # 监控端口   
+    
+    livenessProbe:  #对Pod内各容器健康检查的设置，当探测无响应几次后将自动重启该容器(其检测方式也分为三种)，判断容器是否是存活的
+      exec:       　 #1.执行一个命令，根据命令的返回值判断容器是否健康，对Pod容器内检查方式设置为exec方式
+        command: [string]  #exec方式需要制定的命令或脚本
+      httpGet:       #通过应用程序暴露的API借口来检查，状态码位200-400，则认为容器健康。对Pod内个容器健康检查方法设置为HttpGet，需要制定Path、port
+        # 尝试在scheme协议下，访问host中port端口下path路径的资源
+        path: string
+        port: number
+        host: string
+        scheme: string
+        HttpHeaders:
+        - name: string
+          value: string
+      tcpSocket:     #2.通过tcp连接检查容器内的端口是否时通的，对Pod内个容器健康检查方式设置为tcpSocket方式
+         port: number
+       initialDelaySeconds: 0       #容器启动完成后首次探测的时间，单位为秒
+       timeoutSeconds: 0    　　    #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
+       periodSeconds: 0     　　    #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
+       successThreshold: 1          #成功一次即为成功
+       failureThreshold: 2          #失败2次即为失败
+       securityContext:
+         privileged: false
+         
+    lifecycle: #生命周期钩子
+	postStart: #容器启动后立即执行此钩子,如果执行失败,会根据重启策略进行重启
+	preStop: #容器终止前执行此钩子,无论结果如何,容器都会终止
+
+  # 重启策略，指pod所重启的策略
+  # 重启是指pod的重启，自然就要在pod级别的
+  restartPolicy: [Always | Never | OnFailure]  #Pod的重启策略
+
+  
+  # pod需要调度到节点上去运行，nodeName
+  nodeName: <string> #设置NodeName表示将该Pod调度到指定到名称的node节点上
+
+  # 同样是通过label selector来实现
+  nodeSelector: <obeject> #设置NodeSelector表示将该Pod调度到包含这个label的node上
+  # 亲和性, 具体看后续讲解
+  Affinity
+  #nodeSelector: # 可选，指定Node节点
+  #      region: subnet7
+
+
+  # 镜像拉取密钥，是配置在pod级别的
+  imagePullSecrets: #Pull镜像时使用的secret名称，以key：secretkey格式指定
+  - name: string
+  
+  hostNetwork: false   #是否使用主机网络模式，默认为false，如果设置为true，表示使用宿主机网络
+  
+  # pod的存储卷，是在pod上进行定义，而在各个pod内部进行引用。
+  # 因为pod内的多个容器是共享网络和共享存储的。
+  # 那么，网络和存储都是在pod级别的，也就是在pause容器上
+  # 当业务容器创建时，就加入进来。实现网络和存储共享
+  # 共享网络，是指一个pod的容器共享podIP、mac等
+  # 网络会自动进行分配，存储则需要我们手动指定，并且在容器内进行手动引用
+  volumes:   #在该pod上定义共享存储卷列表
+  - name: string    #共享存储卷名称 （volumes类型有很多种）
+    emptyDir: {}       #类型为emtyDir的存储卷，与Pod同生命周期的一个临时目录。为空值，
+    hostPath: string   #类型为hostPath的存储卷，表示挂载Pod所在宿主机的目录
+      path: string      　　        #Pod所在宿主机的目录，将被用于同期中mount的目录
+    secret:       　　　#类型为secret的存储卷，挂载集群与定义的secret对象到容器内部
+      scretname: string  
+      items:     
+      - key: string
+        path: string
+    configMap:         #类型为configMap的存储卷，挂载预定义的configMap对象到容器内部
+      name: string
+      items:
+      - key: string
+        path: string
+        
+  # 污点容忍
+  tolerations:
+    - key: 
+      operator:
+      value:
+      effect:
