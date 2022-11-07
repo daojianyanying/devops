@@ -213,10 +213,11 @@ kubectl get deployment nginx -o yaml > nginx-deployment.yaml
 kubectl replace -f nginx-deployment.yaml
 kubectl edit deployment nginx
 kubectl create deployment nginx  --image=nginx:1.15.2
-kubectl set image deploy nginx nginx=nginx:1.15.3 --record
+kubectl set image deploy nginx nginx=nginx:1.15.3 --record #修改delpoyment的信息
 kubectl rollout status deploy nginx
 kubectl get rs
 kubectl get rs nginx-5b8bf7dbdd -oyaml
+kubectl rollout status deployment nginx  #获取deployment的滚动发布信息
 ```
 
 ### pod的退出流程：
@@ -320,13 +321,73 @@ nginx       3/3     3                               3           8m42s        	ng
 - images: 镜像
 - selector： 管理pod的标签
 
-deploy的更新：
+deploy的更新(滚动更新)：
 
-更新的条件：改了spec的template才会识别到更新
+更新的条件：改了spec的template才会识别到更新，更新之后pod的ip变了？？？？每次更新都是往上递增吗？？
 
 ```
+使用命令行修改deployument：
 kubectl set image deploy nginx nginx=nginx:1.15.3 --record
+也可以通过编译yaml文件修改、kubectl replace:
+kubectl edit deployment nginx
+
+kubectl set  多用于发版本时去处理
 ```
 
 
 
+deployment的回滚操作：
+
+回滚分为俩种：
+
+1.直接回退到上一个版本
+
+kubectl rollout undo deployment nignx
+
+2.回退到指定版本
+
+kubectl rollout undo deployment nginx --to-revision 6
+
+```shell
+kubectl rollout history deploy nginx #查看deployment的历史版本操作
+回滚到上一个版本:
+kubectl rollout undo deployment nignx
+回退到指定的版本:
+kubectl rollout undo deployment nginx --to-revision 6
+查看指定版本的详细信息：
+kubectl rollout history deploy nginx --revision 6
+```
+
+
+
+deployment的扩容和缩容:
+
+俩种方式：
+
+使用kubectl命令行工具扩容(推荐)：
+
+缩容: kubectl scale --replicas=6 deploy nginix
+
+缩容:kubectl scale --replicas=6 deploy nginix
+
+使用edit命令扩容：
+
+
+
+deployment的更新暂停和恢复：
+
+出现是为了解决这个问题：命令行修改deployment时每次只能改一个
+
+定义：暂停deployment的更新，等命令都执行完后再开始更新
+
+
+
+暂停更新：
+
+kubectl rollout pause deployment nginx
+
+kubectl set image deployment nginx nginx=nginx:1.15.3 --record  #修改镜像版本
+
+kubectl set image deployment nginx nginx=nginx:1.15.3 --record #修改内存和cpu 	
+
+kubectl set resources deployment nginx -c nginx --limits=cpu=200m,memory=128Mi --requests=cpu=10m,memory=16mi
