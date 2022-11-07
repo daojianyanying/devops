@@ -102,7 +102,7 @@ spec:  #必选，Pod中容器的详细定义  # pod的期望行为的具体描�
 # 1.16后支持
 #    startupProbe: # 1.16后支持，可选，检测容器内进程是否完成启动，只检查一次，多用于启动比较慢的情况，默认inti是10s
 
-。注意三种检查方式(startupProbe、readinessProbe、livenessProbe)同时只能使用一种。
+#注意三种检查方式(startupProbe、readinessProbe、livenessProbe)同时只能使用一种。
 #                  # 如果配置了startupProbe，就会禁止其他探测，知道他停止为止，成功后将不在探测
 #      httpGet:      # httpGet检测方式，生产环境建议使用httpGet实现接口级健康检查，健康检查由应用程序提供。
 #            path: /api/successStart # 检查路径
@@ -136,8 +136,19 @@ spec:  #必选，Pod中容器的详细定义  # pod的期望行为的具体描�
          privileged: false
          
     lifecycle: #生命周期钩子
-	postStart: #容器启动后立即执行此钩子,如果执行失败,会根据重启策略进行重启
-	preStop: #容器终止前执行此钩子,无论结果如何,容器都会终止
+      postStart: #容器启动后立即执行此钩子,如果执行失败,会根据重启策略进行重启,容器完成之后的指令可以是exec httpGet TCpSocket
+        htttpGet:
+          path:
+          port:
+          
+      preStop: #容器终止前执行此钩子,无论结果如何,容器都会终止
+        htttpGet:
+          path:
+          port:  
+        exec:
+          - sh
+          - -c
+          - sleep 90
 
   # 重启策略，指pod所重启的策略
   # 重启是指pod的重启，自然就要在pod级别的

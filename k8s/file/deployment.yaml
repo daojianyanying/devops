@@ -1,0 +1,199 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+  labels:
+    app: pod-1
+spec:
+  containers:
+  - name: pod-1
+    image: nginx:1.20.2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  #指定空间名
+  namespace: dev
+spec:
+  #deploy升级的最大时间
+  progressDeadlineSeconds: 120
+  #副本数
+  replicas: 2
+  #deploy升级最大记录数，默认值为 10
+  revisionHistoryLimit: 10
+  #标签和选择器
+  selector:
+    matchLabels:
+      app: test-dev
+  #更新策略，Recreate,rollingUpdate(默认)
+  strategy:
+    rollingUpdate:
+      #滚动升级中，容器副本的最大数量（默认值，可根据实际情况修改）
+      maxSurge: 25%
+      #滚动升级中，容器副本停止的最大数量（默认值，可根据实际情况修改）
+      maxUnavailable: 25%
+    type: RollingUpdate
+  #容器启动模板
+  template:
+    metadata:
+      labels:
+        app: test-dev
+    spec:
+      affinity:
+        #node节点亲和力
+        #在nodeAffinity类型下指定nodeSelectorTerms对象，不能有多个，如果存在多个只有最后一个生效，那么只有最后一个nodeSelectorTerms对象生效
+        nodeAffinity:
+          #【硬策略】情况下，让pod调度到打了标签role=worker(节点不存在)，会一直处于pendding状态，
+          requiredDuringSchedulingIgnoredDuringExecution:
+            #在nodeSelectorTerms下指定了多个matchExpressions列表，那么只要能满足其中一个matchExpressions，就可以将pod调度到某个节点上
+            nodeSelectorTerms:
+            #匹配规则
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - worker
+        #pod节点亲和力
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          #标签选择，只选择调度到 app:pod-1，硬策略,如果没有最上面的pod,则调度失败
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - pod-1
+            #topologyKey用于指定调度时作用域，以Node节点为区分范围
+            topologyKey: kubernetes.io/hostname
+        #pod节点亲和力
+        podAntiAffinity:
+          #【软策略】让pod尽量调度到worker节点
+          preferredDuringSchedulingIgnoredDuringExecution:
+          #weight 倾向权重，在范围1-100
+          - weight: 1
+            podAffinityTerm:
+              #标签选择，尽可能调度到 app:pod-2，软策略
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - pod-2
+              #topologyKey用于指定调度时作用域，以Node节点的操作系统类型来区分
+              topologyKey: beta.kubernetes.io/os
+      containers:
+      #定义容器内部变量
+      - env:
+        - name: NAME_SPACE
+          value: dev
+        #指定镜像名
+        image: nginx:1.20.2
+        #拉取镜像策略，（Always：总是拉取，IfNotPresent：默认值,本地有则使用本地镜像,不拉取，Never：只使用本地镜像，从不拉取）
+        imagePullPolicy: Always
+        #【存活性探针】，用于判断容器是不是健康，如果不满足健康条件，检测接口失败后，根据Pod中设置的 restartPolicy(重启策略)来判断Pod是否要进行重启操作,
+        livenessProbe:
+          #探测失败的重试次数，重试一定次数后将认为失败，在 readiness 探针中，Pod会被标记为未就绪，默认为3，最小值为 1
+          failureThreshold: 3
+          #*通过TCP方式做存活探测*
+          tcpSocket:
+            port: 80
+          #延迟检测5s，如果是java服务，时间按需求设置更长
+          initialDelaySeconds: 5
+          #重试时间间隔
+          periodSeconds: 10
+          #成功检测2次，表示就绪
+          successThreshold: 2
+          #超时时间设置2s
+          timeoutSeconds: 2
+        #【就绪性探针】，用于判断容器内的程序是否存活（或者说是否健康），检测失败后，将 Pod 的 IP:Port 从对应的 EndPoint 列表中删除
+        readinessProbe:
+          failureThreshold: 3
+          #*通过容器的IP地址、端口号及路径调用 HTTP Get方法*，如果响应的状态码大于等于200且小于400，则认为容器 健康
+          httpGet:
+            path: /index.html
+            port: 80
+            #用于连接host的协议，默认为HTTP
+            scheme: HTTP
+          #*执行指定的命令*，如果执行成功，退出码为0,，也可以用在livenessProbe
+          #exec:
+          #command:
+          #  - test
+          #  - -f
+          #  - /var/log/nginx/access.log
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 2
+          timeoutSeconds: 1
+        name: nginx-deployment
+        ports:
+		#容器内部端口
+        - containerPort: 80
+          #容器名
+          name: nginx-dp
+          protocol: TCP
+        #资源限制
+        resources:
+          #最大限制
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          #初始资源请求
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        #容器的异常终止消息的路径，默认在/dev/termination-log
+        terminationMessagePath: /dev/termination-log
+        #默认情况容器退出时，退出信息会从文件中读取，默认File，可以修改：FallbackToLogsOnError，使用容器日志输出的最后一部分内容来作为终止消息（Pod内所有容器的终止信息大小之和最大为12KB）
+        terminationMessagePolicy: File
+        #容器挂载
+        volumeMounts:
+        #容器挂载内部目录
+        - mountPath: /usr/share/nginx/html/
+          name: nginx-dp
+      #集群挂载信息
+      volumes:
+      #与容器挂载名相同
+      - name: nginx-dp
+        #指定pvc类型
+        persistentVolumeClaim:
+          #指定pvc名
+          claimName: nginx-dp-pvc
+      #Pod设置DNS的策略，默认ClusterFirst,所有请求会优先在集群所在域查询，如果没有才会转发到上游DNS,Default:使用宿主机的/etc/resolv.conf,ClusterFirstWithHostNet:Pod运行在hostNetwork:true的情况下强制指定的,None:自定义
+      dnsPolicy: ClusterFirst
+      #自定义dns
+      #dnsPolicy: "None"
+      #  dnsConfig:
+      #    nameservers:
+      #      - 223.5.5.5
+      #    #search字段的配置，最多配置6个
+      #    searches:
+      #      - ns1.svc.cluster.local
+      #      - my.dns.search.suffix
+      #    options:
+      #      - name: ndots
+      #        value: "2"
+      #      - name: edns0
+      #镜像拉取加密的用户密码
+      imagePullSecrets:
+      - name: harbor
+      #容器重启策略，OnFailure：容器异常时自动重启，Never:从不重启容器，Always:只有容器不允许状态，就自动重启容器
+      restartPolicy: Always
+      #pod调度规则，（预选策略Predicates包括：PodFitsPorts（PodFitsPorts）、PodFitsResources（PodFitsResources）、NoDiskConflict（NoDiskConflict）、MatchNodeSelector（PodSelectorMatches）和HostName（PodFitsHost））
+      #节点亲和性(nodeAffinity),pod亲和性（podAffinity）,污点（Taint,Toleration）
+      schedulerName: default-scheduler
+      #为容器添加capabilities中的CAP_SYS_RESOURCE能力，安全性高
+      securityContext:
+        #privileged: true
+        #突破普通用户无法ulimit的限制
+        capabilities:
+          add: ["SYS_RESOURCE"]
+      #优雅的终止服务，默认30s,(preStop)
+      terminationGracePeriodSeconds: 30
+#deployment现在运行的状态，kubectl get deployment nginx-deployment
+status:
+  availableReplicas: 1
+  observedGeneration: 28
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
