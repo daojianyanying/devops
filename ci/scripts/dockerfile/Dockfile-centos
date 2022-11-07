@@ -1,0 +1,21 @@
+FROM centos
+
+LABEL maintainer="liu3574226@163.com"
+WORKDIR /usr/local/
+
+#安装jdk
+RUN yum -y install wget\
+	&&yum -y install vim\
+	&&yum -y install net-tools\
+	&&yum -y install lrzsz
+	&&mkdir -p /opt/software; wget -P /opt/software/ https://repo.huaweicloud.com/java/jdk/8u172-b11/jdk-8u172-linux-x64.tar.gz\
+	&&mkdir -p /usr/local/jdk; tar -C /usr/local/jdk/ -zxvf /opt/software/jdk-8u172-linux-x64.tar.gz
+
+#安装maven
+RUN  wget -P /opt/software/ https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz\
+	&&mkdir -p /usr/local/maven; tar -C /usr/local/jdk/ -zxvf /opt/software/apache-maven-3.6.3-bin.tar.gz
+
+#配置环境变量
+ENV JAVA_HOME=/usr/local/jdk/jdk1.8.0_181
+ENV MAVEN_HOME=/usr/local/maven/apache-maven-3.6.3
+ENV PATH $JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH

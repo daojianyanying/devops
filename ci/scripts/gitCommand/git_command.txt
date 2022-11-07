@@ -1,0 +1,92 @@
+wget命令的使用：
+	指定目录的下载地址：
+		wget -P 目录 下载地址
+		wget -P /etc/software  http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.33-linux-glibc2.5-x86_64.tar.gz
+		
+tar命令的解压：
+	指定解压的目录：
+		tar zxvf 压缩文件 -C 指定的目录
+		tar zxvf /source/kernel.tgz -C /source/ linux-2.6.29
+		
+mkdir命令：
+	强制创建文件夹:
+		mkdir -p 文件夹路径
+		mkdir -p /usr/local/maven/
+
+yum命令：
+	指定安装目录：
+		yum -c yum配置文件 --installroot=自定义的安装目录 软件
+		yum -c /etc/yum.conf --installroot=/usr/local git
+
+shell输出换行:
+	echo -e "hello\n wrold"
+	结果为：
+		hello
+		 wrold
+
+rpm安装和卸载命令：
+	安装命令：
+		rpm -ivh 包
+	卸载命令：
+		rpm -e --nodeps 包名
+	确认软件是否安装：
+		rpm -qa | grep 软件名
+	搜索软件的安装目录：
+		rpm -ql jenkins
+
+yum命令：
+	安装软件包
+		yum -y install
+	卸载软件包
+		yum -y remove
+	查找软件包
+		yum search 
+	列出所有可安装的包
+		yum list
+		
+centOS7切换用户:
+	su - root
+	
+nohup命令：
+	后台运行格式：
+		nohup linux命令 &
+	关掉nohup运行的进程：
+		kill -s 9 进程号
+	查看运行的后台进程：
+		ps -ef | grep jenkins	e:显示所有的进程，此参数的效果和指定"A"参数相同  f: ASCII字符显示树状结构，表达程序间的相互关系
+		ps -aux | grep jenkins   a:显示现行终端机下的所有程序，包括其他用户的程序   u:以用户为主的格式来显示程序状况  x: 显示所有程序，不以终端机来区分
+	PID就是进程id
+	
+查看某个端口是否被占用
+	lsof -i:端口号
+	
+/etc/hosts /etc/hosts.allow /etc/hosts.deny这三者的区别：
+	首先/etc/host和/etc/hosts.allow /etc/hosts.deny没有任何关系。hosts文件是Linux系统上一个负责ip地址与域名快速解析的文件。但是hosts.allow和hosts.deny是一个简单的防火墙，这
+	俩个文件是tcpd服务器的配置文件，tcpd服务器可以控制外部ip对本机服务的访问，这俩个文件一般用来孔子ssh限制固定ip登陆。tcp_wrapper防火墙控制某一服务访问策略的前提是：该服
+	务支持tcp——wrapper防火墙，即该服务应用了libwrapper库文件。hosts.allow和hosts.deny的规则执行这时tcp_wrappers,对应的守护进程为tcpd。
+		
+		查看方式： ldd /usr/sbin/sshd | grep libwrap.so.0
+		使用方法：
+		防护顺序：当hosts.allow和 host.deny相冲突时，以hosts.allow设置为准
+	
+linux查看端口占用情况:
+	lsof -i:端口号 用于查看某一端口的占用情况，比如查看8000端口使用情况，lsof -i:8000
+	netstat -tunlp |grep 端口号，用于查看指定的端口号的进程情况，如查看8000端口的情况，netstat -tunlp |grep 8000
+		 -t (tcp) 仅显示tcp相关选项
+                                 -u (udp)仅显示udp相关选项
+                                 -n 拒绝显示别名，能显示数字的全部转化为数字
+                                 -l 仅列出在Listen(监听)的服务状态
+                                 -p 显示建立相关链接的程序名
+
+linux查看用户：
+	cat /etc/passwd
+
+查看LINUX进程内存占用情况：
+	free -m
+	
+
+
+
+	
+
+	
