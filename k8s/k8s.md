@@ -218,6 +218,9 @@ kubectl rollout status deploy nginx
 kubectl get rs
 kubectl get rs nginx-5b8bf7dbdd -oyaml
 kubectl rollout status deployment nginx  #获取deployment的滚动发布信息
+kubectl create -f nginx-statefulset.yaml #
+nslookup localhost
+kubectel delete deployment nginx
 ```
 
 ### pod的退出流程：
@@ -386,8 +389,126 @@ deployment的更新暂停和恢复：
 
 kubectl rollout pause deployment nginx
 
-kubectl set image deployment nginx nginx=nginx:1.15.3 --record  #修改镜像版本
+kubectl set image deployment nginx nginx=nginx:1.15.3 --record  #修改镜像版本	
 
-kubectl set image deployment nginx nginx=nginx:1.15.3 --record #修改内存和cpu 	
+kubectl set resources deployment nginx -c nginx --limits=cpu=200m,memory=128Mi --requests=cpu=10m,memory=16mi #修改内存和cpu 	
 
-kubectl set resources deployment nginx -c nginx --limits=cpu=200m,memory=128Mi --requests=cpu=10m,memory=16mi
+kubectl rollout resume deployment nginx
+
+
+
+注意事项：
+
+kubectl get deployment nginx -oyaml
+
+```yaml
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "9"
+      kubernetes.io/change-cause: kubectl set image deployment nginx nginx=nginx:1.15.5
+        --record=true
+    creationTimestamp: "2022-11-05T11:00:19Z"
+    generation: 16
+    labels:
+      app: nginx
+    name: nginx
+    namespace: default
+    resourceVersion: "636348"
+    uid: c1112665-ded1-4e2d-bd0d-878afedaa113
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 4
+    revisionHistoryLimit: 10        #设置保留rs的旧的副本数量
+    selector:
+      matchLabels:
+        app: nginx
+    strategy:                      #滚动更新的策略,默认时rollingUpdate,新的启动成功再停止旧的，如此罔替另一个时recreate,先删除旧的，再创建pod
+      rollingUpdate:         		
+        maxSurge: 25%				#回滚或更新时，可以超过pod副本数的数量，该值为0  maxunable不能为0
+        maxUnavailable: 25%			#回滚或更新时，最大的不可用pod的数量，可以时数字或者位%，如果值为0 maxSurge不能为0
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: nginx
+      spec:
+        containers:
+        - image: nginx:1.15.5
+          imagePullPolicy: IfNotPresent
+          name: nginx
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 4
+    conditions:
+    - lastTransitionTime: "2022-11-07T12:31:01Z"
+      lastUpdateTime: "2022-11-07T12:31:01Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2022-11-14T11:35:03Z"
+      lastUpdateTime: "2022-11-14T11:35:55Z"
+      message: ReplicaSet "nginx-77fdfcc6d5" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 16
+    readyReplicas: 4
+    replicas: 4
+    updatedReplicas: 4
+kind: List
+metadata:
+  resourceVersion: ""
+
+```
+
+.spec.minReadySeconds：和探针一起用，启动多少秒后没有崩溃视为ready
+
+
+
+### StatefulSet
+
+部署ES集群、mongodb、redis 、kafaka等。和deployment不一样的是statefulset会给pod创建一个粘性标签。创建的stateful的名字时redis后，相对应的副本的名字就是redis-0 redis-1 redis-2。每一个pod一定会创建一个headless Service，statefulset创建出来的pod就是使用headless service(无头服务)进行通信，和普通的service的区别在于headless service没有ClusterIP,它使用endpoint进行互相通信，headless service的一般格式为：
+
+statefulSetName{0-n-1}.serviceName.namespace.svc.cluster.local
+
+说明：
+
+- serviceName为headless service的名字，创建statefulset时，必须指定Headless Service名称
+- 0-----n-1是pod所在的序号
+- statefulName为statefulSet的名字
+- namespace为服务名所在的命名空间
+- .cluster.local为Cluster Domain(集群域)
+
+```
+redis的主从配置：
+slaveof redis-ms-0.redisms.public-service.svc.cluster.local
+```
+
+statefulset使用的注意事项：
+
+- Pod的所有存储必须时PersistentVolume Provisioner(持久化卷配置器)根据请求配置
+- 
+
+
+
+
+
