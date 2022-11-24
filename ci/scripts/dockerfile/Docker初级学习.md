@@ -464,6 +464,12 @@ eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 
 ​	容器互相ping：	 **docker exec -it 容器名1 ping 容器名2**
 
+
+
+#### 四、dockerfile
+
+4.1、
+
 ​	
 
 #### 八、 docker-compose

@@ -221,6 +221,8 @@ kubectl rollout status deployment nginx  #获取deployment的滚动发布信息
 kubectl create -f nginx-statefulset.yaml #
 nslookup localhost
 kubectel delete deployment nginx
+
+kubectl exec -it busybox -- sh  #进入某一个pod
 ```
 
 ### pod的退出流程：
