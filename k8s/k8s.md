@@ -221,6 +221,14 @@ kubectl rollout status deployment nginx  #获取deployment的滚动发布信息
 kubectl create -f nginx-statefulset.yaml #
 nslookup localhost
 kubectel delete deployment nginx
+kubectl get sts -o yaml
+kubectl edit sts web
+kubectl rollout status sts web
+kubectl describe pod web-2
+kubectl get pod -l app=nginx -w
+kubectl delete pod web-2
+kubectl get pod -oyaml | grep image
+kubectl delete pod web-0 web-1 web-2
 
 kubectl exec -it busybox -- sh  #进入某一个pod
 ```
@@ -508,9 +516,67 @@ slaveof redis-ms-0.redisms.public-service.svc.cluster.local
 statefulset使用的注意事项：
 
 - Pod的所有存储必须时PersistentVolume Provisioner(持久化卷配置器)根据请求配置
-- 
 
 
 
+statefulset的更新策略
 
+滚动更新
+
+默认时滚动更新，从下往上更新，先更新web-2,再更新web-1,最后更新web-0。只有更新成功才会继续，失败会立即停止。rollingUpdate->partition字段的意义，默认为0，可以用来实现灰度发布，分段更新，只更新sts的pod的web的数>=partition的sts的pod
+
+```yaml
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2022-11-24T12:22:51Z"
+    generation: 2
+    name: web
+    namespace: default
+    resourceVersion: "691808"
+    uid: fc7d2b69-49a5-4b6b-aa78-d26931e36f47
+  spec:
+    serviceName: nginx
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+
+```
+
+Ondelete策略
+
+​	stateful的配置修改后，不会自动的区更新，必须要去删除pod，才会更新。理解为删除更新
+
+```yaml
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2022-11-24T12:22:51Z"
+    generation: 2
+    name: web
+    namespace: default
+    resourceVersion: "691808"
+    uid: fc7d2b69-49a5-4b6b-aa78-d26931e36f47
+  spec:
+    serviceName: nginx
+    updateStrategy:
+      type: OnDelete
+```
+
+
+
+statefulset的级联删除和非级联删除
+
+级联删除（默认）: 删除statefulset的同时删除pod
+
+kubectl delete sts  web
+
+非级联删除: 删除statefulset的时不删除pod
+
+kubectl delete sts web --cascade=false
 

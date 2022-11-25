@@ -468,9 +468,21 @@ eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 
 #### 四、dockerfile
 
-4.1、
+```
+docker build -f <dockerfile_path> -t <image_name>:<image_tag> 
+```
 
-​	
+4.1、FROM
+
+​	FROM命令，指定基础镜像，必须是第一条指令。。如果不以任何镜像作为基础镜像，可以写成FROM scratch
+
+```
+FROM <image>:<tag>
+```
+
+​	一个dockerfile配置多个FROM（基础镜像）是否可以？这样做的好处和缺点？
+
+
 
 #### 八、 docker-compose
 
