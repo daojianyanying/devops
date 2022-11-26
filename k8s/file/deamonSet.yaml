@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      nodeSelector:
+        ds: "true"
+      containers:
+      - name: nginx
+        image: nginx:1.15.2
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+      terminationGracePeriodSeconds: 30

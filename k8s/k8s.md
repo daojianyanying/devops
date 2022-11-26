@@ -229,6 +229,15 @@ kubectl get pod -l app=nginx -w
 kubectl delete pod web-2
 kubectl get pod -oyaml | grep image
 kubectl delete pod web-0 web-1 web-2
+kubectl label k8s-node ds=true  # 给k8s-node设备打标签
+kubectl get node --show-labels # 获取node的标签
+kubectl rollout history ds nginx # 查看deamondSet的nginx的记录
+kubectl set image ds nginx nginx=nginx:1.15.5 --record
+kubectl get node -l region=subnet7 # 查找标签region=subnet7的node节点
+kubectl get pod -A --show-labels #查看所有node下pod的标签
+kubectl label pod busybox app=busybox   # 给pod加标签,在deployment更新后，从pod添加的标签会丢失
+kubectl get pod -A -l app=busybox   #查找所有标签粗壮奶app=busybox的pod
+kubectl label pod busybox app- 
 
 kubectl exec -it busybox -- sh  #进入某一个pod
 ```
@@ -579,4 +588,43 @@ kubectl delete sts  web
 非级联删除: 删除statefulset的时不删除pod
 
 kubectl delete sts web --cascade=false
+
+
+
+### DaemonSet
+
+ DaemonSet（守护进程集）和守护进程类似，它在符合匹配条件的节点上均部署一个Pod。
+
+ DaemonSet确保全部（或者某些）节点上运行一个Pod副本。当有新节点加入集群时，也会为它们新增一个Pod。当节点从集群中移除时，这些Pod也会被回收，删除DaemonSet将会删除它创建的所有Pod  使用DaemonSet的一些典型用法：  运行集群存储daemon（守护进程），例如在每个节点上运行Glusterd、Ceph等  在每个节点运行日志收集daemon，例如Fluentd、Logstash  在每个节点运行监控daemon，比如Prometheus Node Exporter、Collectd、Datadog代理、New Relic代理或 Ganglia gmond
+
+DaemonSet的更新和回滚
+
+
+
+### Label和Selector
+
+Lable,对k8s中的各类、各种资源，添加一个具有特别属性的标签。Selector通过过滤的语法进行查找到对应标签的资源。
+
+```yaml
+# 添加label
+kubectl label pod busybox app=busybox   # 给pod加标签,在deployment更新后，从pod添加的标签会丢失
+kubectl label k8s-node ds=true  # 给k8s-node设备打标签
+
+#修改label
+# 删除label重新创建
+kubectl label pod busybox app-    # 删除pod的busybox的app的label
+
+# 覆盖重建
+kubectl label pod busybox app=busybox2 --overwrite # 冲洗添加覆盖标签 
+
+
+```
+
+
+
+select的查询语法
+
+```
+kubectl get pod -A -l 
+```
 

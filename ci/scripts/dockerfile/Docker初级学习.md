@@ -482,6 +482,27 @@ FROM <image>:<tag>
 
 ​	一个dockerfile配置多个FROM（基础镜像）是否可以？这样做的好处和缺点？
 
+​	解答：目前docker的版本已经可以支持一个dockerfile中配置多个基础镜像。存在多个FROM基础镜像的dockerfile中，结果是以最后一个基础镜像的操作为结果。而多个基础镜像的最大作用就是能够在最后几个基础镜像中使用之前镜像的结果。这样可以大大减少docker镜像的大小。比如发布go的exe程序。第一个基础镜像是go的编译环境镜像（golang:1.10.3），在编译生成exe后，将exe程序copy到最终的基础镜像中。
+
+```dockerfile
+# FROM scratch  
+# docker的内建关键词语，FROM scratch 会使用一个完全干净的文件系统，不包含任何文件。
+# --from=0 从之前的镜像阶段拷贝文件
+# 从前边的阶段中拷贝文件到当前阶段中，多个FROM语句时，0代表第一个阶段。除了使用数字，我们还可以给阶段命名，--from=builder
+# FROM golang:1.10.3 as builder
+# 从其他镜像复制 --from=quay.io/coreos/etcd:v3.3.9 /usr/local/bin/etcd /usr/local/bin/
+
+FROM golang:1.10.3
+COPY server.go /build/
+WORKDIR /build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOARM=6 go build -ldflags '-w -s' -o server
+# 运行阶段
+ FROM scratch
+# 从编译阶段的中拷贝编译结果到当前镜像中
+COPY --from=0 /build/server /
+ENTRYPOINT ["/server"]
+```
+
 
 
 #### 八、 docker-compose
