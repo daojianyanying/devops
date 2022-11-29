@@ -238,8 +238,12 @@ kubectl get pod -A --show-labels #查看所有node下pod的标签
 kubectl label pod busybox app=busybox   # 给pod加标签,在deployment更新后，从pod添加的标签会丢失
 kubectl get pod -A -l app=busybox   #查找所有标签粗壮奶app=busybox的pod
 kubectl label pod busybox app- 
+kubectl get svc -A
+kubectl scale --replicas=4 deployment nginx
+kubectl logs -f nginx-5b8bf7dbdd-t8p5n
 
 kubectl exec -it busybox -- sh  #进入某一个pod
+kubectl get svc -n kube-system kube-dns -oyaml > nginx-svc.yaml
 ```
 
 ### pod的退出流程：
@@ -622,9 +626,127 @@ kubectl label pod busybox app=busybox2 --overwrite # 冲洗添加覆盖标签
 
 
 
-select的查询语法
+selector的查询语法
 
 ```
-kubectl get pod -A -l 
+kubectl get pod -A -l k8s-app=metrics-server,k8s-app=kubernetes-dashboard
+kubectl get pod -A -l 'k8s-app in (metrics-server, kubernetes-dashboard)'
+kubectl get pod -A -l version!=v1
 ```
 
+
+
+### Service
+
+Service可以理解为逻辑上的一组pod，将相同service的pod集成在一起提供给其他非本service的pod的访问，它相对于pod而言，它会有一个固定名称，一旦创建就固定不变，每一个service都会有一个endponit与之对应，endpoint中存储的就是这个service下的pod的ip地址和端口号。
+
+定义一个service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-svc
+  name: nginx-svc
+spec:
+  ports:
+  - name: http #service端口的名称
+    port: 80 #service自己的端口
+    protocol: TCP # UDP TCP SCTP 默认时TCP
+    targetPort: 80 # 后端应用的端口
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: ClusterIP
+
+
+# 启动后就可以使用service对应的ip访问nginx
+# kubectl logs -f nginx-5b8bf7dbdd-t8p5n
+kubectl get sv
+```
+
+```shell
+/ # wget http://nginx-svc.default  #非特殊情况不要用
+Connecting to nginx-svc.default (10.111.94.192:80)
+index.html           100% |********************************************************************************************************************************************************|   612   0:00:00 ETA
+/ # rm -rf index.html && wget http://nginx-svc
+Connecting to nginx-svc (10.111.94.192:80)
+index.html           100% |********************************************************************************************************************************************************|   612   0:00:00 ETA
+/ # cat index.html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+```
+
+​	使用service代理k8s的外部应用，希望在生产环境中使用固定的名称而非ip地址访问外部的中间件地址。作用类似于host文件。希望service指向另一个Namespace中或者其他集群中的服务。某个项目正在迁移至k8s集群，但是一部分仍然在集群外部，此时可以使用service代理到集群的外部代理。此时只需要更改endpoint中的值就可以。service的名称必须和endpoint的名称一致。
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-external-svc
+  name: nginx-external-svc
+spec:
+  ports:
+  - name: http #service端口的名称
+    port: 80 #service自己的端口
+    protocol: TCP # UDP TCP SCTP 默认时TCP
+    targetPort: 80 # 后端应用的端口
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: ClusterIP
+```
+
+```yaml
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    app: nginx-external-svc
+  name: nginx-external-svc
+  namespace: default
+subsets:
+- addresses:
+  - ip: 192.168.160.171 #外部服务的ip
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+
+```
+
+
+
+
+
+使用service反代理
