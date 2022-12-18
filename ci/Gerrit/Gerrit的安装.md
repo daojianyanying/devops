@@ -2,17 +2,27 @@
 
 ### 零、版本选择
 
-Gerrit + jdk + mysql + nginx + git
+操作系统：ubuntu 20.4
 
-Gerrit：3.3.6
+Gerrit + jdk + nginx + git
+
+Gerrit：3.7
 
 jdk：java 11
 
-mysql：
+git: 
 
-nginx：
+gerrit插件地址: https://gerrit-ci.gerritforge.com/view/Plugins-stable-3.7/ 
 
-git：
+Gerrit下载链接
+
+```
+https://gerrit-releases.storage.googleapis.com/gerrit-3.7.0.war
+
+sudo apt-cache search jdk
+sudo apt install -y openjdk-11-jdk
+sudo apt install apache2-utils
+```
 
 
 
@@ -107,5 +117,83 @@ chkconfig --add mysqld
 #	set password=password("youpassword");
 #	 flush privileges;
 #
+```
+
+
+
+
+
+### 二、gerrit的安装
+
+```shell
+java -jar gerrit-2.7.0.war init -d /data/gerrit_site  #默认不配置，直接全部回车，完成后再进入配置文件修
+vim gerrit.config
+#####
+[gerrit]
+        basePath = git
+        canonicalWebUrl = http://devops:28080/
+        serverId = 89817610-3ba7-448c-8f8e-99189e90282e
+[container]
+        javaOptions = "-Dflogger.backend_factory=com.google.common.flogger.backend.log4j.Log4jBackendFactory#getInstance"
+        javaOptions = "-Dflogger.logging_context=com.google.gerrit.server.logging.LoggingContext#getInstance"
+        user = root
+        javaHome = /usr/lib/jvm/java-11-openjdk-amd64
+[index]
+        type = lucene
+[auth]
+        type = HTTP
+[receive]
+        enableSignedPush = false
+[sendemail]
+        smtpServer = localhost
+[sshd]
+        listenAddress = *:29418
+[httpd]
+        listenUrl = http://*:28080/
+[cache]
+        directory = cache
+
+```
+
+
+
+### 三、nginx的安装和配置
+
+auth_basic_user_file /home/gerrit/gerrit.password 这一行和你安装的代码路径和httppasswd
+
+```shell
+sudo apt install nginx
+sudo nginx -v
+sudo vim /etc/nginx/sites-enabled/default
+
+server {
+listen 28081;
+server_name localhost;
+
+#charset koi8-r;
+
+#access_log logs/host.access.log main;
+
+location / {
+    #root html;
+    #index index.html index.htm;
+    auth_basic "Gerrit Code Review";
+    auth_basic_user_file /data/gerrit_site/etc/gerrit.password;
+    proxy_pass http://10.0.2.37:28080;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header Host $host;
+}
+
+
+nginx -s reload
+```
+
+
+
+### 四、用户创建
+
+```shell
+sudo apt install apache2-utils
+sudo htpasswd -c /data/gerrit_site/etc/gerrit.password admin
 ```
 
