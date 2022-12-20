@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  game.properties: |-
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-12-19T07:24:22Z"
+  name: game-config
+  namespace: default
+  resourceVersion: "1021203"
+  uid: e82d4355-2430-452c-a837-4a526d8b0458

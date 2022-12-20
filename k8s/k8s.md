@@ -193,6 +193,8 @@ tar -xf kubernetes-server-linux-amd64.tar.gz  --strip-components=3 -C /usr/local
 ## 三、学习笔记
 
 ```shell
+注意事项： 
+yaml中的纯数字必须加上双引号
 pod:
 kubectl apply -f pod.yaml -n kube-public #启动一个pod
 kubectl apply pod.yaml  #改了yaml配置文件后可以重新更新启动
@@ -241,6 +243,9 @@ kubectl label pod busybox app-
 kubectl get svc -A
 kubectl scale --replicas=4 deployment nginx
 kubectl logs -f nginx-5b8bf7dbdd-t8p5n
+kubectl describe configmaps game-config-2
+kubectl create configmap game-config-2 --from-file=configure-pod-container/configmap/game.properties
+
 
 kubectl exec -it busybox -- sh  #进入某一个pod
 kubectl get svc -n kube-system kube-dns -oyaml > nginx-svc.yaml
@@ -749,4 +754,239 @@ subsets:
 
 
 
-使用service反代理
+使用service反代理域名
+
+kubectl edit 
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-externalname
+  name: nginx-externalname
+spec:
+  type: ExternalName
+  externalName: www.baidu.com  
+  
+root@k8s-node:/home/devops# kubectl get svc  -A
+NAMESPACE     NAME                 TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                  AGE
+default       kubernetes           ClusterIP      10.96.0.1       <none>          443/TCP                  31d
+default       nginx                ClusterIP      None            <none>          80/TCP                   8d
+default       nginx-external-svc   ClusterIP      10.98.35.78     <none>          80/TCP                   3d19h
+default       nginx-externalname   ExternalName   <none>          www.baidu.com   <none>                   17s
+default       nginx-svc            ClusterIP      10.111.94.192   <none>          80/TCP,443/TCP           3d20h
+kube-system   kube-dns             ClusterIP      10.96.0.10      <none>          53/UDP,53/TCP,9153/TCP   31d
+
+
+kubectl exec -it busybox -- sh
+## 403是因为跨域 被百度拒绝
+/ # wget nginx-externalname
+Connecting to nginx-externalname (180.101.49.13:80)
+wget: server returned error: HTTP/1.1 403 Forbidden
+/ # nslookup  nginx-externalname
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      nginx-externalname
+Address 1: 180.101.49.14 180-101-49-14.nginx-external-svc.default.svc.cluster.local
+Address 2: 180.101.49.13
+/ #
+
+```
+
+
+
+service的常用类型
+
+ClusterIP： 只能在集群的内部使用，也是默认值
+
+ExternalName: 通过返回定义的CNAME别名
+
+NodePort: 在所有安装了kube-proxy的节点上打开一个端口，此端口可以代理至后端的pod,然后集群外部可以使用节点的ip和NodePort的端口号访问到集群pod的服务，Nodeport端口的默认范围是30000-32767,可以用来临时的开放某个端口对外用。
+
+loadBalancer: 使用云提供商的负载均衡器公开服务
+
+
+
+### Ingress
+
+通俗来讲，ingress和之前二个Service、Deployment一样，也是一个k8s的资源，ingress用于实现域名方式访问k8s的内部应用。通过k8s官方的
+
+Ingress的安装
+
+helm的安装
+
+```
+https://kubernetes.github.io/ingress-nginx/deploy/#using-helm
+https://helm.sh/docs/intro/install/
+```
+
+
+
+
+
+配置ingress
+
+
+
+### ConfigMap和Sercret
+
+configmap
+
+从一个文件创建configmap(基于文件创建 ConfigMap)，定义从文件创建 ConfigMap 时要使用的键
+
+
+
+kubectl create configmap game-config-3 --from-file=<我的键名>=<文件路径>
+
+```yaml
+kubectl create configmap game-config-2 --from-file=configure-pod-container/configmap/game.properties
+
+
+apiVersion: v1
+data:
+  game.properties: |-
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-12-19T07:24:22Z"
+  name: game-config
+  namespace: default
+  resourceVersion: "1021203"
+  uid: e82d4355-2430-452c-a837-4a526d8b0458
+```
+
+
+
+使用 `--from-env-file` 选项从环境文件创建 ConfigMap，生成的yaml就不会有文件名作为总的键
+
+
+
+```yaml
+kubectl create configmap config-multi-env-files \
+        --from-env-file=configure-pod-container/configmap/game-env-file.properties \
+        --from-env-file=configure-pod-container/configmap/ui-env-file.properties
+# 1.23之后的版本支持
+kubectl create configmap game-config-env-file --from-env-file=configure-pod-container/configmap/game.properties
+
+apiVersion: v1
+data:
+  enemies: aliens
+  enemies.cheat: "true"
+  enemies.cheat.level: noGoodRotten
+  lives: "3"
+  secret.code.allowed: "true"
+  secret.code.lives: "30"
+  secret.code.passphrase: UUDDLRLRBABAS
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-12-19T07:53:17Z"
+  name: game-config-env-file
+  namespace: default
+  resourceVersion: "1022764"
+  uid: 1a7438d6-3d6e-402a-9d1c-23be5d472bf1
+  
+  
+  apiVersion: v1
+data:
+  allow.textmode: "true"
+  color.bad: yellow
+  color.good: purple
+  enemies: aliens
+  enemies.cheat: "true"
+  enemies.cheat.level: noGoodRotten
+  how.nice.to.look: fairlyNice
+  lives: "3"
+  secret.code.allowed: "true"
+  secret.code.lives: "30"
+  secret.code.passphrase: UUDDLRLRBABAS
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-12-19T08:24:22Z"
+  name: game-evn-config-2
+  namespace: default
+  resourceVersion: "1024013"
+  uid: ef75e202-284a-4299-94ce-27fd2f692a96
+
+
+```
+
+ 	
+
+根据字面值创建 ConfigMap
+
+```yaml
+kubectl create configmap special-config --from-literal=special.how=very --from-literal=special.type=charm
+
+kubectl get configmaps special-config -o yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2016-02-18T19:14:38Z
+  name: special-config
+  namespace: default
+  resourceVersion: "651"
+  uid: dadce046-d673-11e5-8cd0-68f728db1985
+data:
+  special.how: very
+  special.type: charm
+```
+
+
+
+在pod中使用configmap
+
+
+
+### 卷挂载
+
+volumes
+
+一些需要持久化数据的程序才会用到volumes，或者时一些需要共享数据的情况。
+
+emptyDir类型的volumes
+
+特点：如果删除pod，emptyDir卷中的数据也会被删除，一般emptyDir卷用于同一个pod中的不同container共享数据。它可以被挂载到相同或者不同的设备上。
+
+```
+
+```
+
+
+
+
+
+
+
+nfs类型的volumes
+
+nfs的安装
+
+```shell
+# 服务端配置
+sudo apt-get -y install nfs-kernel-server nfs-common 
+sudo vim /etc/exports
+# 添加如下配置  /nfsroot *(rw,sync,no_root_squash)  "/nfsroot"是要共享的目录
+sudo mkdir /nfsroot
+sudo chmod -R 777 /nfsroot
+sudo chown ipual:ipual /nfsroot/ -R
+sudo /etc/init.d/nfs-kernel-server restart
+
+# 这里的“10.0.2.15”是将“/nfsroot”共享的主机的ip，“/mnt”是与“/nfsroot”共享的目录。两个目录都要写出准确的地址
+# 客户端配置
+sudo mount -t nfs ip(开启nfs服务的主机):/nfsroot /mnt -o nolock
+```
+
