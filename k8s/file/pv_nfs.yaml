@@ -1,0 +1,32 @@
+apiVersion: v1
+# pv的状态  avaiable:空闲的pv，没有被任何pvc绑定；bound: 已经被pvc绑定；Released:pvc被删除，但是资源未被重新使用
+# failed 自动回收失败
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  # pv的容量
+  capacity:
+    storage: 5Gi
+  # 挂载类型，默认文件系统 block，
+  volumeMode: Filesystem
+  # 访问模式
+  # ReadWtiteOnce  可以被单节点以读写的模式挂载
+  # ReadWtiteMany  可以被多个节点以读写的形式挂载
+  # ReadOnlyMany   可以别多个节点以只读的形式挂载
+  accessModes:
+    - ReadWriteOnce
+  #回收策略，recycle删除之后会对卷进行rm -rf 删除pvc时会把pv的内容全部删掉，但是不会删除pv
+  #Retain：保留 删除pvc时 pv的数据仍然存在
+  #Delete: 删除pvc后，pv也会被删掉，但是动态存储的默认方式
+  persistentVolumeReclaimPolicy: Recycle
+  # pv的类名 只有pvc和pv的名字对应上，才能被访问
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data/nfs/pv
+    server: 192.168.160.171
+
+# 

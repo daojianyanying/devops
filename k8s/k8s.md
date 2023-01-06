@@ -990,3 +990,78 @@ sudo /etc/init.d/nfs-kernel-server restart
 sudo mount -t nfs ip(开启nfs服务的主机):/nfsroot /mnt -o nolock
 ```
 
+
+
+PV和PVC
+
+PersistentVolume:PV  PVC：PersistentVolumeClaim是对PV的申请
+
+PV:
+
+PVC:
+
+使用PV&PVC
+
+pv和pvc的注意事项：
+
+创建pvc之后一直绑定不上pv（pending状态）
+
+1. pvc的申请空间大小大于pv的空间大小
+2. PVC的storageClassName没有和pv的一致
+3. PVC的访问模式和PV的访问模式不一致
+
+创建挂在了pvc的pod之后，一直处于pending状态
+
+1. pvc创建失败
+2. pvc和pod不在同一个namespace之下
+3. 删除pvc必须先删除绑定pvc的容器删除掉
+
+
+
+### RBAC
+
+Role-Brased Access Control  基于角色的控制。它是一种基于企业内个人角色来管理一些资源的访问。
+
+RBAC分为4中顶级资源： Role、ClusterRole、RoleBinding、ClusterRoleBinding。
+
+Role: 角色，包含一组权限的规则，没有拒绝规则，只是附加允许。namespace隔离，只作用于命名空间内。
+
+ClusterRole:和role唯一的区别是role只作用于命名空间内，cluserRole是作用于整个集群
+
+使用RoleBinding和ClusterRoleBinding:将Role或者CluserRole绑定到User Group 上
+
+Role和RoleCluster
+
+```yaml
+# ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" 被忽略，因为 ClusterRoles 不受名字空间限制
+  name: secret-reader
+  label:
+    self-cluster-role: test
+rules:
+- apiGroups: [""]
+  # 在 HTTP 层面，用来访问 Secret 资源的名称为 "secrets"
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+```
+
+```yaml
+# 聚合ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      # 将匹配所有符合标签的ClusterRole的权限
+      self-cluster-role: test
+rules: [] # 控制面自动填充这里的规则
+```
+
+
+
+ClusterRoleBinding
