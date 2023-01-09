@@ -1,6 +1,6 @@
 # python中使用过的第三方库
 
-## 一、APScheduler
+# 一、APScheduler
 
 ### 1.1、功能
 
@@ -77,3 +77,51 @@ sched.add(job_def_name, 'date', datetime(2022,11,9,16,5,1), args=['text'])
 2.1、功能
 
 2.2、
+
+
+
+# 三、其他细节的东西
+
+### 3.1、关于with...as 
+
+```python
+with expression as variable:
+  with block
+```
+
+前提：该对象必须有`__enter__、__exit__`方法
+
+执行过程:
+
+1. 先执行expression，然后执行该表达式返回的对象实例的__enter__函数，然后将该函数的返回值赋给as后面的变量。(注意，是将__enter__函数的返回值赋给变量)
+2. 然后执行with block代码块，不论成功，错误，异常，在with block执行结束后，会执行第一步中的实例的__exit__函数。
+
+
+
+### 3.2、python的object
+
+1. dir(对象)：返回对象具有的所有属性
+
+2. \_\_str\_\_()方法：用于返回一个对象的描述 常用于print方法，帮助查看对象的信息，可以对__str__()进行重写
+
+   ```python
+   print(object())
+   ```
+
+3. \_\_add\_\_()：实现了两个对象的加法运算
+
+   
+
+4. \_\_len\_\_()：相当于len()，对没有len()的对象重写__len__()
+
+   
+
+5. \_\_new\_\_()和\_\_init_\_()
+
+6. aaaa
+
+7. aaaaa
+
+
+
+### 3.3、id()
