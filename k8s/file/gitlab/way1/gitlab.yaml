@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab
+spec:
+  type: NodePort
+  ports:
+  # Port上的映射端口
+  - port: 443
+    targetPort: 443
+    name: gitlab443
+  - port: 1680
+    targetPort: 80
+    name: gitlab80
+  - port: 22
+    targetPort: 22
+    name: gitlab22
+  selector:
+    app: gitlab
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+spec:
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      containers:
+      # 应用的镜像
+      - image: gitlab/gitlab-ce 
+        name: gitlab
+        imagePullPolicy: IfNotPresent
+        # 应用的内部端口
+        env:
+        - name: TZ
+          value: Asia/Shanghai
+        - name: GITLAB_TIMEZONE
+          value: Beijing
+        - name: GITLAB_ROOT_PASSWORD
+          value: admin321
+        - name: GITLAB_HOST
+          value: 192.168.160.171
+        - name: GITLAB_PORT
+          value: "80"
+        - name: GITLAB_SSH_PORT
+          value: "22"
+        - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS
+          value: "true"
+        - name: GITLAB_NOTIFY_PUSHER
+          value: "false"
+        ports:
+        - containerPort: 443
+          name: gitlab443
+        - containerPort: 80
+          name: gitlab80
+        - containerPort: 22
+          name: gitlab22
+        volumeMounts:
+        # gitlab持久化
+        - name: gitlab-persistent-config
+          mountPath: /etc/gitlab
+        - name: gitlab-persistent-logs
+          mountPath: /var/log/gitlab
+        - name: gitlab-persistent-data
+          mountPath: /var/opt/gitlab
+      volumes:
+      - name: gitlab-persistent-config
+        persistentVolumeClaim:
+          claimName: gitlab-config-pvc
+      - name: gitlab-persistent-logs
+        persistentVolumeClaim:
+          claimName: gitlab-logs-pvc
+      - name: gitlab-persistent-data
+        persistentVolumeClaim:
+          claimName: gitlab-data-pvc
+
