@@ -66,7 +66,7 @@
 
 
 
-- 填写apt使用的源
+- 填写apt使用的源  https://mirrors.tuna.tsinghua.edu.cn/ubuntu
 
 ![](image/ubuntu_install_9.png)
 
