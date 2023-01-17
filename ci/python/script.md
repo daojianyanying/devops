@@ -100,6 +100,8 @@ with expression as variable:
 
 ### 3.2、python的object
 
+- **特殊方法**
+
 1. dir(对象)：返回对象具有的所有属性
 
 2. \_\_str\_\_()方法：用于返回一个对象的描述 常用于print方法，帮助查看对象的信息，可以对__str__()进行重写
@@ -116,12 +118,50 @@ with expression as variable:
 
    
 
-5. \_\_new\_\_()和\_\_init_\_()
+5. \_\_new\_\_()
 
-6. aaaa
+   ```python
+   class Person(object):
+       def __new__(cls, *args, **kwargs):
+           print("__new__被调用执行了，cls的id值{0}".format(id(cls)))
+           obj = super().__new__(cls)
+           print("创建的对象的id为：{0}".format(id(obj)))
+           return obj
+       
+        def __init__(self, name, age):
+           print('__init__被调用了，self的id值为：{0}'.format(id(self)))
+           self.name = name
+           self.age = age
+   
+   ```
+
+   
+
+6. \_\_init_\_()
+
+   
+
+7. aaaa
+
+   
+
+- **特殊属性**
+
+1. aaa
+
+2. aaaa
+
+3. aaaaa
+
+4. aaaaa
+
+5. aaaaa
+
+6. aaaaa
 
 7. aaaaa
 
-
+   
 
 ### 3.3、id()
+
