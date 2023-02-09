@@ -575,6 +575,8 @@ $ jps
 12612 Jps
 5172 jar
 
+##########
+
 ```
 
 #### 十二、 用windows链接windows10系统
@@ -681,11 +683,76 @@ gitlab/gitlab-ce:14.10.2-ce.0
 
 
 
+
+
+
+
 #### 十七、gitlab-runner的安装
 
 ##### 一、windows上的安装
 
 ##### 二、linux上的安装
+
+
+
+#### 十八、docker部署mysql
+
+```shell
+# --restart=always： 当Docker 重启时，容器会自动启动。
+# --privileged=true：容器内的root拥有真正root权限，否则容器内root只是外部普通用户权限
+
+docker run --restart=always --privileged=true  \
+-v /data/mysql/data/:/var/lib/mysql \
+-v /data/mysql/logs/:/var/log/mysql \
+-v /data/mysql/conf/:/etc/mysql \
+-v /data/mysql/my.cnf:/etc/mysql/my.cnf  \
+-p 3306:3306 --name mysql-5.7.30 \
+-e MYSQL_ROOT_PASSWORD=/8520*963.lx -d mysql:5.7.30
+```
+
+mysql的初始化
+
+
+
+
+
+#### 十九、docker部署confluence
+
+```shell
+
+```
+
+
+
+#### 二十、docker部署jenkins
+
+```
+chown -R 1000:1000 /data/jenkins
+docker run --restart=always --privileged=true --name jenkins -p 8888:8080 -p 50000:50000 -v /data/jenkins:/var/jenkins_home  -d  jenkins/jenkins:2.361.1 
+```
+
+
+
+
+
+#### 二十一、docker部署minio
+
+```shell
+# 官方镜像名称  minio/minio
+
+chown -R 1000:1000 
+docker run -p 9900:9900 -p 9090:9090 \
+     --name minio \
+     --privileged=true \
+     -d --restart=always \
+     -e "MINIO_ACCESS_KEY=easyadmin" \
+     -e "MINIO_SECRET_KEY=/8520*963.lx" \
+     -v /data/minio/data:/data \
+     -v /data/minio/config:/root/.minio \
+     minio/minio:RELEASE.2023-02-09T05-16-53Z.fips server \
+     /data --console-address ":9090" -address ":9900"
+
+```
 
 
 

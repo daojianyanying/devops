@@ -5,7 +5,19 @@
 ### 1.1、修改主机名
 
 ```shell
-hostnamectl set-hostname k8s-master
+hostnamectl set-hostname k8s-master1
+
+
+cat >> /etc/hosts << EOF
+192.168.75.201 k8s-master1
+192.168.75.202 k8s-master2
+192.168.75.203 k8s-master3
+192.168.75.204 k8s-node1
+192.168.75.205 k8s-node2
+192.168.75.206 k8s-node3
+192.168.75.207 k8s-node4
+192.168.75.208 k8s-node5
+EOF
 ```
 
 
@@ -75,9 +87,6 @@ vim /etc/docker/daemon.json
 	}
 }
 sudo systemctl daemon-reload
-sudo systemctl restart docker
-sudo systemctl enable docker
-sudo systemctl status docker
 
 ```
 
@@ -105,7 +114,7 @@ systemctl enable kubelet
 
 为什么？
 
-​	因为自从v1.24移除了docker-shim的支持后,而Docker Enigne默认不支持CRI规范，因此二者无法直接完成整合。为此Mirantis和docker联合创建了cri-docker项目，用于为Docker Engine提供一个能够支持CRI规范的垫片，从而可以让kubernetes给予CRI控制Docker。
+​	因为自从v1.24移除了docker-shim的支持后,而Docker Enigne默认不支持CRI规范，因此二者无法直接完成整合。为此Mirantis和docker联合创建了cri-docker项目，用于为Docker Engine提供一个能够支持CRI规范的垫片，从而可以让kubernetes给予CRI控制Docker。cri-dockerd的版本是和ubuntu版本密切相关的。
 
 
 
@@ -132,8 +141,35 @@ sudo systemctl daemon-reload && systemctl restart cri-docker.service
 ###  1.9、kubernetes初始化
 
 ```
-kubeadm init --kubernetes-version=v1.25.0 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 --token-ttl=0 --cri-socket unix:///run/cri-dockerd.sock --image-repository registry.aliyuncs.com/google_containers --upload-certs
+kubeadm init --kubernetes-version=v1.25.0 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12 --token-ttl=0 --cri-socket unix:///var/run/cri-dockerd.sock --image-repository registry.aliyuncs.com/google_containers --upload-certs
 
+
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.75.201:6443 --token i1xilu.olvq79yb8qggwk4p \
+        --discovery-token-ca-cert-hash sha256:cd964111a5236ff5907f762e1886d11bf2e221a8ab2acee452fbf7ddde03aa52
+
+
+
+
+#初始化失败可以使用kubeadm rest重置
 ```
 
 
@@ -150,7 +186,37 @@ kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Doc
 
 
 
+### 1.11、 遇到的问题
 
+1. The connection to the server localhost:8080 was refused - did you specify the right host or port?
+
+   ```
+   cd /etc/kubernetes
+   echo "export KUBECONFIG=/etc/kubernetes/kubelet.conf" >> /etc/profile
+   source /etc/profile
+   
+   ```
+
+   
+
+2. 添加master节点
+
+   ```
+   kubeadm join 192.168.75.201:6443 --token stlfk6.g3qg861eikrdqrzr \
+     --discovery-token-ca-cert-hash sha256:8cf15ed2eecc1df37bd58823a6b8849558cf33e2a3f2bde8bc35fc6ab13ec059  --control --certificate-key 
+   ```
+
+   
+
+3. kubeadm删除初始化的节点
+
+   ```shell
+   kubeadm reset
+   ```
+
+   
+
+4. 
 
 
 
